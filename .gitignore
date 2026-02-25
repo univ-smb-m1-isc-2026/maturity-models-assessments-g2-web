@@ -20,7 +20,14 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
 # Visual Studio Code
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
