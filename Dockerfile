@@ -10,4 +10,6 @@ RUN npm run build --prod
 
 FROM nginx:alpine3.23 AS runtime
 
-COPY --from=builder /app/dist/front /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /app/dist/front/browser /usr/share/nginx/html
