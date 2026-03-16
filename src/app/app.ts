@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {HttpClient} from '@angular/common/http';
+import {environment} from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ export class App implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get('http://localhost:8080/hello', { responseType: 'text' })
+    this.http.get(`${environment.apiUrl}/hello`, { responseType: 'text' })
       .subscribe(data => this.message.set (data));
   }
 }
