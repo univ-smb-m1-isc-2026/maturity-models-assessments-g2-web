@@ -6,6 +6,17 @@ $text: #1e1b4b;
 $text-light: #6b7280;
 $border: #e5e7eb;
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
+
+$font-display: 'DM Serif Display', Georgia, serif;
+$font-body:    'Sora', system-ui, sans-serif;
+
+* {
+  font-family: $font-body;
+  box-sizing: border-box;
+}
+
+
 .login-wrapper {
   display: flex;
   align-items: center;
@@ -26,15 +37,15 @@ $border: #e5e7eb;
       0 2px 8px rgba(0, 0, 0, 0.06);
     animation: fadeInUp 0.4s ease;
 
-    .login-title {
-      font-size: 1.75rem;
-      font-weight: 900;
-      color: $text;
-      text-align: center;
-      margin-bottom: 2rem;
-      letter-spacing: -0.5px;
-    }
-
+   .login-title {
+  font-family: $font-display; // ← manquait !
+  font-size: 1.75rem;
+  font-weight: 400;           // ← DM Serif ne supporte QUE 400
+  color: $text;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
     .login-form {
       display: flex;
       flex-direction: column;

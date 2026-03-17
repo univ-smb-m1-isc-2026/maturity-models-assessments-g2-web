@@ -1,5 +1,10 @@
 import { Role } from './role.enum';
 
+export enum Status {
+  ATTENTE = "En attente",
+  ACTIF = "Actif"
+}
+
 export interface User {
   id: number;
   email: string; 
@@ -7,6 +12,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: Role;
-  teamId?: number; // un user peut être dans plusieur team ? 
+  teamId?: number; // à voir gestion des id user dans team.model 
+  status : Status
   createdAt?: Date;
 }

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { delay, map, tap } from 'rxjs/operators';              
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';               
-import { User } from '@models/user.model';
+import { Status, User } from '@models/user.model';
 import { Role } from '@models/role.enum';
 
 /**
@@ -43,7 +43,8 @@ login(email: string, password: string): Observable<User> {
       lastName: 'Martin',
       email: 'pmo@test.com',
       password: 'password123',
-      role: Role.PMO
+      role: Role.PMO,
+      status : Status.ACTIF
     },
     'teamlead@test.com': {
       id: 2,
@@ -51,7 +52,8 @@ login(email: string, password: string): Observable<User> {
       lastName: 'Dupont',
       email: 'teamlead@test.com',
       password: 'password123',
-      role: Role.TEAM_LEAD
+      role: Role.TEAM_LEAD,
+      status : Status.ACTIF
     },
     'member@test.com': {
       id: 3,
@@ -59,7 +61,8 @@ login(email: string, password: string): Observable<User> {
       lastName: 'Durand',
       email: 'member@test.com',
       password: 'password123',
-      role: Role.TEAM_MEMBER
+      role: Role.TEAM_MEMBER,
+      status : Status.ACTIF
     }
   };
 
@@ -123,7 +126,8 @@ login(email: string, password: string): Observable<User> {
       lastName: 'Dupont',
       email: 'jean.dupont@email.com',
       password: 'password123',
-      role: Role.TEAM_MEMBER
+      role: Role.TEAM_MEMBER, 
+      status : Status.ACTIF
     };
     return of(mockUser);
 

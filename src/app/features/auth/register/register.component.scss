@@ -6,6 +6,17 @@ $text: #1e1b4b;
 $text-light: #6b7280;
 $border: #e5e7eb;
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
+
+$font-display: 'DM Serif Display', Georgia, serif;
+$font-body:    'Sora', system-ui, sans-serif;
+
+* {
+  font-family: $font-body;
+  box-sizing: border-box;
+}
+
+
 .register-wrapper {
   display: flex;
   align-items: center;

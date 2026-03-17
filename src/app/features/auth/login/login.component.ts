@@ -41,8 +41,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // la route n'existant pas encore, cela créer une E404 qui est redirigé vers l'accueil sinon un message d'erreur apparait sur la page login
-
     this.authService.login(
       this.loginForm.value.email,
       this.loginForm.value.password
@@ -72,7 +70,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {  // ✅ Nettoyage des subscriptions
+  ngOnDestroy(): void {  
     this.destroy$.next();
     this.destroy$.complete();
   }
