@@ -1,0 +1,105 @@
+<div class="dashboard-wrapper">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🧩 MaturityApp</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" routerLink="/member/dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" routerLink="/member/evaluation">
+        <span class="nav-icon">📝</span> Mes évaluations
+      </a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Déconnexion
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <header class="main-header">
+      <div>
+        <h1 class="main-title">Mon espace</h1>
+        <p class="main-subtitle">Bienvenue, {{ currentUser?.firstName }} 👋</p>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">📝</span>
+        <div>
+          <p class="stat-value">{{ evaluations.length }}</p>
+          <p class="stat-label">Évaluations complétées</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📋</span>
+        <div>
+          <p class="stat-value">{{ models.length }}</p>
+          <p class="stat-label">Modèles disponibles</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">⭐</span>
+        <div>
+          <p class="stat-value">{{ evaluations[0]?.level ?? '-' }}</p>
+          <p class="stat-label">Dernier niveau atteint</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modèles disponibles -->
+    <section class="section">
+      <h2 class="section-title">📋 Modèles à évaluer</h2>
+      <div class="empty-state" *ngIf="models.length === 0">
+        <p>Aucun modèle disponible pour l'instant</p>
+      </div>
+      <div class="models-grid" *ngIf="models.length > 0">
+        <div class="model-card" *ngFor="let model of models" (click)="selectModel(model)">
+          <div class="model-card-header">
+            <span class="model-icon">{{ model.icon }}</span>
+            <span class="model-tag">{{ model.category }}</span>
+          </div>
+          <h3 class="model-name">{{ model.title }}</h3>
+          <p class="model-desc">{{ model.description ?? 'Aucune description' }}</p>
+          <div class="model-levels">
+            <span class="level-badge" *ngFor="let level of model.levels">{{ level }}</span>
+          </div>
+          <div class="model-meta">
+            <span>📝 {{ model.questions.length }} question(s)</span>
+          </div>
+          <button class="btn-primary">🚀 Démarrer l'évaluation</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historique évaluations -->
+    <section class="section">
+      <h2 class="section-title">📅 Historique de mes évaluations</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Modèle</th>
+              <th>Date</th>
+              <th>Niveau atteint</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let eval of evaluations">
+              <td>{{ eval.modelTitle }}</td>
+              <td>{{ eval.date | date:'dd/MM/yyyy' }}</td>
+              <td><span class="level-badge">{{ eval.level }}</span></td>
+              <td>⭐ {{ eval.score }} / 5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
