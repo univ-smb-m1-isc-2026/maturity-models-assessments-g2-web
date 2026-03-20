@@ -1,12 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
+import { Subject, of, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '@core/auth.service';
 import { MaturityModelService } from '@core/maturity-model.service';
+import { TeamService } from '@core/team.service';
+import { SessionService } from '@core/session.service';
 import { MaturityModel } from '@models/maturity-model.model';
 import { User } from '@models/user.model';
+import { Team } from '@models/team.model';
+import { Session } from '@models/session.model';
+import { SessionStatus } from '@models/status.enum';
 
 @Component({
   selector: 'app-team-member-dashboard',
@@ -17,6 +22,7 @@ import { User } from '@models/user.model';
 })
 export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
+  currentTeam: Team | null = null;
   models: MaturityModel[] = [];
   selectedModel: MaturityModel | null = null;
 
@@ -31,24 +37,49 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private maturityModelService: MaturityModelService,
+    private sessionService : SessionService,
+    private teamService: TeamService, 
     private router: Router
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
 
   ngOnInit(): void {
-    this.maturityModelService.getModels().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (models) => this.models = models,
-      error: () => console.error('Erreur chargement des modèles')
-    });
+    if (this.currentUser) {
+      this.teamService.getTeamByUserid(this.currentUser.id).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: (team) => this.currentTeam = team ?? null,
+        error: () => console.error('Erreur chargement de l\'équipe')
+      });
+    }
+      this.getModelBySession()
   }
 
-  selectModel(model: MaturityModel): void {
-    this.selectedModel = model;
-    // ✅ Naviguer vers le formulaire d'évaluation
-    this.router.navigate(['/member/evaluation', model.id]);
+  getActiveSession(): Observable<Session[]> {
+  if (!this.currentTeam) return of([]);
+  return this.sessionService.getActiveSessionsByTeam(this.currentTeam.id);
+}
+
+ getModelBySession(): void {
+  this.sessionService.getActiveSessionsByTeam(this.currentTeam!.id).pipe(
+    takeUntil(this.destroy$)
+  ).subscribe({
+    next: (sessions) => {
+      sessions.forEach(session => {
+        this.maturityModelService.getModelById(session.modelId).pipe( 
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: (model) => { if (model) this.models.push(model) },
+          error: () => console.error(`Erreur chargement modèle ${session.modelId}`)
+        });
+      });
+    },
+    error: () => console.error('Erreur chargement des sessions')
+  });
+}
+  evaluer(): void {
+    // TODO: récupère le model et dirige vers la page d'évaluation
   }
 
   logout(): void {
