@@ -58,7 +58,7 @@
         <p>Aucun modèle disponible pour l'instant</p>
       </div>
       <div class="models-grid" *ngIf="models.length > 0">
-        <div class="model-card" *ngFor="let model of models" (click)="selectModel(model)">
+        <div class="model-card" *ngFor="let model of models" (click)="evaluer()">
           <div class="model-card-header">
             <span class="model-icon">{{ model.icon }}</span>
             <span class="model-tag">{{ model.category }}</span>
