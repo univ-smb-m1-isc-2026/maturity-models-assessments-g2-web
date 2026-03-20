@@ -2,10 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "baseUrl": "./",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@models/*": ["src/app/models/*"]
+      "@models/*": ["./src/app/models/*"],
+      "@core/*": ["./src/app/core/*"],
+      "@features/*": ["./src/app/features/*"]
     }
   },
   "include": [
@@ -13,5 +16,6 @@
   ],
   "exclude": [
     "src/**/*.spec.ts"
-  ]
+  ],
+  
 }
