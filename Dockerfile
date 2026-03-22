@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm install
 
-RUN npm run build --prod
+RUN npm run build:prod
 
 FROM nginx:alpine3.23 AS runtime
 
