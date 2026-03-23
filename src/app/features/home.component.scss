@@ -1,301 +1,189 @@
-$primary: #6366f1;
-$primary-dark: #4f46e5;
-$text: #1e1b4b;
-$text-light: #6b7280;
+// ── Variables ─────────────────────────────────────
+$primary:#6366f1;
+$primary-dark:#4f46e5;
+$text:#1e1b4b;
+$text-light:#6b7280;
 
+// ── Mixins utiles ─────────────────────────────────
+@mixin card($bg:#fff) {
+  background:$bg;
+  border-radius:1.25rem;
+  border:1px solid #e0e7ff;
+}
 
-// ================================
-// HERO
-// ================================
+@mixin hover-lift {
+  transition:.2s;
+  &:hover {
+    transform:translateY(-4px);
+    box-shadow:0 12px 32px rgba($primary,.12);
+  }
+}
+
+// ── HERO ──────────────────────────────────────────
 .hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4rem;
-  padding: 6rem 4rem;
-  background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 50%, #e0e7ff 100%);
-  min-height: 85vh;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:4rem;padding:6rem 4rem;min-height:85vh;
+  background:linear-gradient(135deg,#faf5ff,#ede9fe,#e0e7ff);
 
   .hero-content {
-    flex: 1;
-    max-width: 560px;
+    flex:1;max-width:560px;
 
     .hero-badge {
-      display: inline-block;
-      padding: 0.4rem 1rem;
-      background: #ede9fe;
-      color: $primary-dark;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
+      display:inline-block;padding:.4rem 1rem;
+      background:#ede9fe;color:$primary-dark;
+      border-radius:999px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem;
     }
 
     .hero-title {
-      font-size: 3.5rem;
-      font-weight: 900;
-      color: $text;
-      line-height: 1.15;
-      margin-bottom: 1.25rem;
-      letter-spacing: -1px;
+      font-size:3.5rem;font-weight:900;color:$text;
+      line-height:1.15;margin-bottom:1.25rem;letter-spacing:-1px;
     }
 
     .hero-subtitle {
-      font-size: 1.15rem;
-      color: $text-light;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
+      font-size:1.15rem;color:$text-light;
+      line-height:1.7;margin-bottom:2.5rem;
     }
 
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
+    .hero-actions { display:flex;gap:1rem;flex-wrap:wrap; }
   }
 
   .hero-visual {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+    flex:1;display:flex;justify-content:center;
 
     .visual-card {
-      background: #fff;
-      border-radius: 1.5rem;
-      padding: 2rem;
-      width: 380px;
-      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.18);
-      border: 1px solid #e0e7ff;
+      @include card;
+      padding:2rem;width:380px;
+      box-shadow:0 20px 60px rgba($primary,.18);
 
       .visual-header {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        margin-bottom: 1.5rem;
+        display:flex;align-items:center;gap:.4rem;margin-bottom:1.5rem;
 
         .visual-dot {
-          width: 12px; height: 12px;
-          border-radius: 50%;
-          &.red    { background: #ef4444; }
-          &.yellow { background: #eab308; }
-          &.green  { background: #22c55e; }
+          width:12px;height:12px;border-radius:50%;
+          &.red{background:#ef4444}
+          &.yellow{background:#eab308}
+          &.green{background:#22c55e}
         }
 
-        .visual-title {
-          margin-left: 0.5rem;
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: $text;
+        .visual-title { margin-left:.5rem;font-size:.9rem;font-weight:700;color:$text; }
+      }
+
+      .visual-level {
+        display:flex;align-items:center;gap:.75rem;
+
+        .level-label { width:80px;font-size:.8rem;font-weight:600;color:$text; }
+        .level-pct { width:36px;text-align:right;font-size:.75rem;color:$text-light; }
+
+        .level-bar {
+          flex:1;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;
+
+          .level-fill { height:100%;border-radius:999px;transition:width .6s; }
         }
       }
 
-      .visual-levels {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-
-        .visual-level {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-
-          .level-label {
-            width: 80px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: $text;
-            flex-shrink: 0;
-          }
-
-          .level-bar {
-            flex: 1;
-            height: 10px;
-            background: #f3f4f6;
-            border-radius: 999px;
-            overflow: hidden;
-
-            .level-fill {
-              height: 100%;
-              border-radius: 999px;
-              transition: width 0.6s ease;
-            }
-          }
-
-          .level-pct {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: $text-light;
-            width: 36px;
-            text-align: right;
-          }
-        }
-      }
+      .visual-levels { display:flex;flex-direction:column;gap:.85rem; }
     }
   }
 }
 
-// ================================
-// FEATURES
-// ================================
+// ── FEATURES & ROLES (mutualisé) ─────────────────
+.features,.roles {
+  padding:5rem 4rem;text-align:center;
+
+  &-title {
+    font-size:2rem;font-weight:800;color:$text;margin-bottom:3rem;
+  }
+
+  &-grid {
+    display:grid;gap:1.5rem;
+    grid-template-columns:repeat(3,1fr);
+    max-width:1100px;margin:auto;
+  }
+}
+
+// Features
 .features {
-  padding: 5rem 4rem;
-  background: #fff;
-  text-align: center;
+  .feature-card {
+    @include card(#faf5ff);
+    padding:2rem;text-align:left;
+    @include hover-lift;
 
-  .features-title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: $text;
-    margin-bottom: 3rem;
-  }
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    max-width: 1100px;
-    margin: 0 auto;
-
-    .feature-card {
-      padding: 2rem;
-      background: #faf5ff;
-      border-radius: 1.25rem;
-      border: 1px solid #e0e7ff;
-      text-align: left;
-      transition: transform 0.2s, box-shadow 0.2s;
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.12);
-      }
-
-      .feature-icon  { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
-      .feature-title { font-size: 1rem; font-weight: 700; color: $text; margin-bottom: 0.5rem; }
-      .feature-desc  { font-size: 0.875rem; color: $text-light; line-height: 1.6; }
-    }
+    .feature-icon{font-size:2rem;margin-bottom:.75rem}
+    .feature-title{font-size:1rem;font-weight:700;color:$text;margin-bottom:.5rem}
+    .feature-desc{font-size:.875rem;color:$text-light;line-height:1.6}
   }
 }
 
-// ================================
-// ROLES
-// ================================
+// Roles
 .roles {
-  padding: 5rem 4rem;
-  background: linear-gradient(135deg, #f5f3ff, #e0e7ff);
-  text-align: center;
+  background:linear-gradient(135deg,#f5f3ff,#e0e7ff);
 
-  .roles-title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: $text;
-    margin-bottom: 3rem;
-  }
+  .role-card {
+    @include card;
+    padding:2rem;text-align:left;
+    box-shadow:0 4px 20px rgba($primary,.08);
+    @include hover-lift;
 
-  .roles-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    max-width: 1000px;
-    margin: 0 auto;
+    .role-icon{font-size:2.5rem;margin-bottom:.75rem}
+    .role-name{font-size:1.1rem;font-weight:800;color:$text;margin-bottom:.5rem}
+    .role-desc{font-size:.875rem;color:$text-light;margin-bottom:1rem;line-height:1.6}
 
-    .role-card {
-      background: #fff;
-      border-radius: 1.25rem;
-      padding: 2rem;
-      text-align: left;
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
-      transition: transform 0.2s;
+    .role-perks {
+      list-style:none;padding:0;margin:0;
+      display:flex;flex-direction:column;gap:.4rem;
 
-      &:hover { transform: translateY(-4px); }
-
-      .role-icon { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
-      .role-name { font-size: 1.1rem; font-weight: 800; color: $text; margin-bottom: 0.5rem; }
-      .role-desc { font-size: 0.875rem; color: $text-light; margin-bottom: 1rem; line-height: 1.6; }
-
-      .role-perks {
-        list-style: none;
-        padding: 0; margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-
-        li { font-size: 0.85rem; color: $text; }
-      }
+      li{font-size:.85rem;color:$text}
     }
   }
 }
 
-// ================================
-// CTA
-// ================================
+// ── CTA ──────────────────────────────────────────
 .cta {
-  padding: 5rem 4rem;
-  background: linear-gradient(135deg, $primary, $primary-dark);
-  text-align: center;
+  padding:5rem 4rem;text-align:center;
+  background:linear-gradient(135deg,$primary,$primary-dark);
 
-  .cta-title {
-    font-size: 2.25rem;
-    font-weight: 900;
-    color: #fff;
-    margin-bottom: 1rem;
-  }
-
-  .cta-subtitle {
-    font-size: 1.1rem;
-    color: rgba(255,255,255,0.8);
-    margin-bottom: 2rem;
-  }
+  .cta-title{font-size:2.25rem;font-weight:900;color:#fff;margin-bottom:1rem}
+  .cta-subtitle{font-size:1.1rem;color:rgba(255,255,255,.8);margin-bottom:2rem}
 }
 
-// ================================
-// FOOTER
-// ================================
+// ── FOOTER ───────────────────────────────────────
 .footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 1.5rem 4rem;
-  background: $text;
-  color: rgba(255,255,255,0.6);
-  font-size: 0.85rem;
+  display:flex;justify-content:space-between;
+  padding:1.5rem 4rem;
+  background:$text;color:rgba(255,255,255,.6);
+  font-size:.85rem;
 }
 
-// ================================
-// BUTTONS
-// ================================
-.btn-primary {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, $primary, $primary-dark);
-  color: #fff !important;
-  border-radius: 0.75rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  box-shadow: 0 4px 14px rgba($primary, 0.4);
-  transition: all 0.2s;
+// ── BUTTONS ──────────────────────────────────────
+.btn {
+  display:inline-block;
+  padding:.75rem 1.5rem;
+  border-radius:.75rem;
+  font-weight:700;
+  text-decoration:none;
+  transition:.2s;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba($primary, 0.5);
+  &-primary {
+    background:linear-gradient(135deg,$primary,$primary-dark);
+    color:#fff!important;
+    box-shadow:0 4px 14px rgba($primary,.4);
+
+    &:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba($primary,.5);
+    }
   }
 
-  &.btn-lg { padding: 1rem 2rem; font-size: 1rem; }
+  &-ghost {
+    background:rgba(255,255,255,.85);
+    color:$text!important;
+    border:2px solid #e0e7ff;
+
+    &:hover { background:#fff;border-color:$primary; }
+  }
+
+  &.btn-lg { padding:1rem 2rem;font-size:1rem; }
 }
 
-.btn-ghost {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: rgba(255,255,255,0.8);
-  color: $text !important;
-  border-radius: 0.75rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-decoration: none;
-  border: 2px solid #e0e7ff;
-  transition: all 0.2s;
-
-  &:hover { background: #fff; border-color: $primary; }
-  &.btn-lg { padding: 1rem 2rem; font-size: 1rem; }
-}
-
-.main { min-height: 100vh; }
+// ── Global ───────────────────────────────────────
+.main { min-height:100vh; }
