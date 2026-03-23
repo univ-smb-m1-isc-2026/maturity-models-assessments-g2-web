@@ -24,21 +24,38 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'member/evaluation/:id',
+    component: EvaluationComponent,
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'pmo/dashboard',
     component: PmoDashboardComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['PMO'] }
   },
+  {
+    path: 'pmo/model/new',
+    component: FormModelComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['PMO'] }
+  },
+  { 
+    path: 'pmo/model/edit/:id', 
+    component: EditModelComponent, 
+    canActivate: [AuthGuard, RoleGuard], 
+    data: { roles: ['PMO'] } 
+  },
   { 
     path: 'pmo/team', 
     component: TeamManagementComponent, 
     canActivate: [AuthGuard, RoleGuard], 
-    data: { roles: ['PMO'] }
+    data: { roles: ['PMO'] } 
   },
   {
     path: 'lead/dashboard',
     component: TeamLeadDashboardComponent,
-    //canActivate: [AuthGuard, RoleGuard],
+    canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['TEAM_LEAD'] }
-  }
+  },
 ]
