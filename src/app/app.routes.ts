@@ -11,6 +11,7 @@ import { RegisterComponent } from '@features/auth/register/register.component';
 import { HomeComponent } from '@features/home.component';
 
 // Guards
+import { AuthGuard} from '@core/auth.guard';
 import { RoleGuard } from '@core/role.guard';
 
 export const routes: Routes = [
@@ -25,7 +26,7 @@ export const routes: Routes = [
   {
     path: 'pmo/dashboard',
     component: PmoDashboardComponent,
-    //canActivate: [AuthGuard, RoleGuard],
+    canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['PMO'] }
   },
   { 

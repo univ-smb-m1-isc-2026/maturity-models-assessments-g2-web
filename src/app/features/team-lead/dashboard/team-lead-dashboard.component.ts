@@ -15,7 +15,7 @@ import { User } from '@models/user.model';
   standalone: true,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './team-lead-dashboard.component.html',
-  styleUrls: ['../../_dashboard.component.scss']
+  //styleUrls: ['../../_dashboard.component.scss']
 })
 export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
@@ -27,9 +27,9 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   inviteError: string = '';
   sessionError: string = '';
   isInviting: boolean = false;
-  isSession: boolean = false; 
+  isSession: boolean = false;
   showInviteModal: boolean = false;
-  showSessionModal: boolean = false; 
+  showSessionModal: boolean = false;
 
   // 🔧 Mock membres invités — à remplacer par appel API
   teamMembers = [
@@ -41,7 +41,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
          password: 'password123',
          role: "team member",
          status : "Actif"
-       }, 
+       },
        {
         id: 3,
         firstName: 'Lea',
@@ -71,7 +71,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     });
 
     this.sessionForm = this.fb.group({
-      modelId: ['', Validators.required]  
+      modelId: ['', Validators.required]
     });
 
     this.maturityModelService.getModels().pipe(
@@ -125,7 +125,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
- 
+
 
   startSession():void {
     if (this.sessionForm.invalid) return;

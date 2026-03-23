@@ -18,7 +18,7 @@ import { SessionStatus } from '@models/status.enum';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './member-dashboard.component.html',
-  styleUrls: ['../../_dashboard.component.scss']
+  //styleUrls: ['../../_dashboard.component.scss']
 })
 export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
@@ -38,7 +38,7 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private maturityModelService: MaturityModelService,
     private sessionService : SessionService,
-    private teamService: TeamService, 
+    private teamService: TeamService,
     private router: Router
   ) {
     this.currentUser = this.authService.getCurrentUser();
@@ -67,7 +67,7 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
   ).subscribe({
     next: (sessions) => {
       sessions.forEach(session => {
-        this.maturityModelService.getModelById(session.modelId).pipe( 
+        this.maturityModelService.getModelById(session.modelId).pipe(
           takeUntil(this.destroy$)
         ).subscribe({
           next: (model) => { if (model) this.models.push(model) },

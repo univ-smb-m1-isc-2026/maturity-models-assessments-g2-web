@@ -3,7 +3,8 @@
  */
 
 export interface SessionResult {
-  sessionId: string;
+  sessionResultId: number;
+  sessionId: number;
   averages: number[];
   participants: {
     userId: number;
