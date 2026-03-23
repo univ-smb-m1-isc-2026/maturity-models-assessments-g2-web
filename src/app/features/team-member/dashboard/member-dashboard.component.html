@@ -58,7 +58,7 @@
         <p>Aucun modèle disponible pour l'instant</p>
       </div>
       <div class="models-grid" *ngIf="models.length > 0">
-        <div class="model-card" *ngFor="let model of models" (click)="evaluer()">
+        <div class="model-card" *ngFor="let model of models" >
           <div class="model-card-header">
             <span class="model-icon">{{ model.icon }}</span>
             <span class="model-tag">{{ model.category }}</span>
@@ -71,7 +71,7 @@
           <div class="model-meta">
             <span>📝 {{ model.questions.length }} question(s)</span>
           </div>
-          <button class="btn-primary">🚀 Démarrer l'évaluation</button>
+          <button class="btn-primary" (click)="evaluer(model.id)">🚀 Démarrer l'évaluation</button>
         </div>
       </div>
     </section>

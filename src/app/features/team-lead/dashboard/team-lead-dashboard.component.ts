@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '@core/auth.service';
 import { MaturityModelService } from '@core/maturity-model.service';
+import { SessionService } from '@core/session.service';
 import { MaturityModel } from '@models/maturity-model.model';
 import { User } from '@models/user.model';
 
@@ -57,6 +58,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private maturityModelService: MaturityModelService,
+    private sessionService : SessionService,
     private fb: FormBuilder,
     private router: Router
   ) {
@@ -127,7 +129,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
 
   startSession():void {
     if (this.sessionForm.invalid) return;
-   // TODO : start une session sur un model pour son équipe
+    //this.sessionService.createSession()
   }
 
   logout(): void {

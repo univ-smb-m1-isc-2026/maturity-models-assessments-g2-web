@@ -53,7 +53,7 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
         error: () => console.error('Erreur chargement de l\'équipe')
       });
     }
-      this.getModelBySession()
+      +this.getModelBySession()
   }
 
   getActiveSession(): Observable<Session[]> {
@@ -78,8 +78,8 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
     error: () => console.error('Erreur chargement des sessions')
   });
 }
-  evaluer(): void {
-    // TODO: récupère le model et dirige vers la page d'évaluation
+  evaluer(modelId: number): void {
+   this.router.navigate(["/member/evaluation/", modelId])
   }
 
   logout(): void {

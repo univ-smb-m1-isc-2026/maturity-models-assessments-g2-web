@@ -1,0 +1,90 @@
+<div class="dashboard-wrapper">
+  <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🧩 MaturityApp</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/member/dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" routerLink="/member/evaluations">
+        <span class="nav-icon">📝</span> Mes évaluations
+      </a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Déconnexion
+    </button>
+  </aside>
+
+  <!-- ── Page content ─────────────────────────────────────────────────────── -->
+  <div class="page-content">
+
+    <!-- ═══════════════════════════════════════ MAIN CONTENT -->
+    <main class="eval-main" *ngIf="!isFetching && model">
+
+      <!-- ── Model header -->
+      <section class="model-hero">
+        <h1 class="model-hero__title">{{ model.title }}</h1>
+        <p class="model-hero__desc" *ngIf="model.description">{{ model.description }}</p>
+      </section>
+
+      <!-- ─────────────── EVALUATION STEP ─────────────── -->
+      <ng-template #evaluationStep>
+             <!-- Itération sur les questions -->
+          <div class="question-block" *ngFor="let question of model.questions">
+
+            <div class="question-header">
+              <p class="question-text">{{ question.text }}</p>
+            </div>
+
+            <!-- Les niveaux de maturité = options de réponse -->
+           <label class="level-btn" *ngFor="let level of model.levels">
+                <input type="radio"
+                       [name]="'q_' + question.id"
+                       [value]="level"
+                       [disabled]="submitted"/>
+                <span class="lvl-label">{{ level }}</span>
+            </label>
+
+          </div><!-- /question-block -->
+
+          <!-- ── Submit bar -->
+          <div class="submit-bar" *ngIf="!submitted">
+            <button class="btn btn--primary btn--lg"
+                    (click)="submitEvaluation()"
+                    [disabled]="isLoading"
+                    [class.btn--loading]="isLoading">
+              <span *ngIf="!isLoading">Soumettre l'évaluation</span>
+              <span class="btn-spinner" *ngIf="isLoading"></span>
+            </button>
+            <p class="submit-hint">Vos réponses seront définitivement enregistrées.</p>
+        </div>
+
+      </ng-template>
+      <!-- /evaluationStep -->
+      
+      <!-- ─────────────── RESULT STEP ─────────────── -->
+      <ng-container *ngIf="isResultStep; else evaluationStep">
+        <section class="result-section">
+          <div class="result-card">
+            <div class="result-card__icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h2>Évaluation soumise</h2>
+            <p>Vos réponses ont bien été enregistrées. Retrouvez les résultats ci-dessous.</p>
+            <button class="btn btn--primary"
+                    (click)="getSessionResult()"
+                    [class.btn--loading]="isLoading">
+              <span *ngIf="!isLoading">Voir les résultats</span>
+              <span class="btn-spinner" *ngIf="isLoading"></span>
+            </button>
+          </div>
+        </section>
+      </ng-container>
+      
+    </main>
+
+  </div><!-- /page-content -->
+
+</div><!-- /dashboard-wrapper -->
