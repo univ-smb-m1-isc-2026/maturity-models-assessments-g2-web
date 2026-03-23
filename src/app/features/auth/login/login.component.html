@@ -1,0 +1,43 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2 class="login-title">Connexion</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+      <div class="form-group">
+        <label>Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+        />
+        <p class="error-msg" *ngIf="loginForm.controls['email'].invalid && loginForm.controls['email'].touched">
+          Email invalide
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Mot de passe"
+        />
+        <p class="error-msg" *ngIf="loginForm.controls['password'].invalid && loginForm.controls['password'].touched">
+          Mot de passe requis
+        </p>
+      </div>
+
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button type="submit" [disabled]="loginForm.invalid" class="submit-btn">
+        Se connecter
+      </button>
+
+    </form>
+
+    <p class="register-link">
+      Pas de compte ? <a routerLink="/register">S'inscrire</a>
+    </p>
+  </div>
+</div>

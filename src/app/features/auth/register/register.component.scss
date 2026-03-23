@@ -1,0 +1,187 @@
+$primary: #6366f1;
+$primary-dark: #4f46e5;
+$primary-glow: rgba(99, 102, 241, 0.2);
+$error: #f43f5e;
+$text: #1e1b4b;
+$text-light: #6b7280;
+$border: #e5e7eb;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
+
+$font-display: 'DM Serif Display', Georgia, serif;
+$font-body:    'Sora', system-ui, sans-serif;
+
+* {
+  font-family: $font-body;
+  box-sizing: border-box;
+}
+
+
+.register-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 50%, #e0e7ff 100%);
+
+  .register-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 2.5rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 8px 32px rgba(99, 102, 241, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.06);
+    animation: fadeInUp 0.4s ease;
+
+    .register-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: $text;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    // ✅ Badge invitation
+    .invite-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+      border: 1px solid #c7d2fe;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      color: $primary-dark;
+      font-weight: 500;
+      text-align: center;
+
+      strong { font-weight: 800; }
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+
+        label {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: $text;
+        }
+
+        input,
+        select {
+          padding: 0.75rem 1rem;
+          border: 1.5px solid $border;
+          border-radius: 0.75rem;
+          font-size: 0.95rem;
+          color: $text;
+          background: #fff;
+          transition: all 0.2s ease;
+          outline: none;
+          font-family: inherit;
+
+          &::placeholder { color: #c4c4d4; }
+
+          &:focus {
+            border-color: $primary;
+            box-shadow: 0 0 0 4px $primary-glow;
+            background: #fafaff;
+          }
+
+          &[readonly] {
+            background: #f5f3ff;
+            color: $text-light;
+            cursor: not-allowed;
+            border-color: #ddd6fe;
+          }
+
+          &.ng-invalid.ng-touched {
+            border-color: $error;
+            box-shadow: 0 0 0 4px rgba($error, 0.12);
+          }
+        }
+
+        // ✅ Select personnalisé
+        select {
+          cursor: pointer;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236366f1'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 0.75rem center;
+          background-size: 1rem;
+          padding-right: 2.5rem;
+        }
+      }
+
+      .error-msg {
+        font-size: 0.8rem;
+        color: $error;
+        font-weight: 500;
+        text-align: center;
+        &::before { content: '⚠ '; }
+      }
+
+      .submit-btn {
+        margin-top: 0.5rem;
+        width: 100%;
+        padding: 0.85rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, $primary, $primary-dark);
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba($primary, 0.4);
+        transition: all 0.2s ease;
+        letter-spacing: 0.2px;
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba($primary, 0.5);
+        }
+
+        &:active:not(:disabled) { transform: translateY(0); }
+
+        &:disabled {
+          background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+          box-shadow: none;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .login-link {
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+      color: $text-light;
+
+      a {
+        color: $primary;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s;
+        &:hover { color: $primary-dark; text-decoration: underline; }
+      }
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

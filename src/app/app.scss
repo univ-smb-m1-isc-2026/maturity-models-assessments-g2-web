@@ -1,0 +1,38 @@
+$primary: #6366f1;
+$primary-dark: #4f46e5;
+$text: #1e1b4b;
+$text-light: #6b7280;
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 4rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e5e7eb;
+
+  .navbar-logo {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $text;
+  }
+
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .nav-link {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $text-light;
+      text-decoration: none;
+      transition: color 0.2s;
+      &:hover { color: $primary; }
+    }
+  }
+}
