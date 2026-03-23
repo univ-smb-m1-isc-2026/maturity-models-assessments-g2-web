@@ -1,22 +1,29 @@
-import { Component, signal, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../environments/environment';
+import { Component, OnInit } from '@angular/core';
+import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { filter } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, NgIf],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.scss']
 })
 export class App implements OnInit {
-  protected readonly title = signal('front');
-  message = signal('Chargement...');
+  showHeader = true;
 
-  constructor(private http: HttpClient) {}
+  constructor(private router: Router) {}
 
-  ngOnInit() {
-    this.http.get(`${environment.apiUrl}/hello`, { responseType: 'text' })
-      .subscribe(data => this.message.set (data));
+  ngOnInit(): void {
+    this.showHeader = this.router.url === '/';
+
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: any) => {
+      const hiddenRoutes = ['dashboard', 'model', 'team'];
+      this.showHeader = !hiddenRoutes.some(r => e.url.includes(r));
+    });
   }
 }

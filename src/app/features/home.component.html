@@ -1,0 +1,81 @@
+ <div class="landing">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">✨ Nouveau — Évaluez votre maturité</span>
+      <h1 class="hero-title">
+        Pilotez la maturité<br />
+        de vos équipes
+      </h1>
+      <p class="hero-subtitle">
+        MaturityApp vous permet de créer des modèles de maturité personnalisés,
+        d'évaluer vos équipes et de suivre leur progression en temps réel.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn-primary btn-lg">Commencer gratuitement →</a>
+        <a routerLink="/login"    class="btn-ghost btn-lg">Se connecter</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="visual-card">
+        <div class="visual-header">
+          <span class="visual-dot red"></span>
+          <span class="visual-dot yellow"></span>
+          <span class="visual-dot green"></span>
+          <span class="visual-title">Modèle Scrum</span>
+        </div>
+        <div class="visual-levels">
+          <div class="visual-level" *ngFor="let level of previewLevels">
+            <span class="level-label">{{ level.name }}</span>
+            <div class="level-bar">
+              <div class="level-fill" [style.width]="level.fill" [style.background]="level.color"></div>
+            </div>
+            <span class="level-pct">{{ level.fill }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <h2 class="features-title">Tout ce dont vous avez besoin</h2>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features">
+        <span class="feature-icon">{{ feature.icon }}</span>
+        <h3 class="feature-title">{{ feature.title }}</h3>
+        <p class="feature-desc">{{ feature.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section class="roles">
+    <h2 class="roles-title">Un outil pour chaque rôle</h2>
+    <div class="roles-grid">
+      <div class="role-card" *ngFor="let role of roles">
+        <span class="role-icon">{{ role.icon }}</span>
+        <h3 class="role-name">{{ role.name }}</h3>
+        <p class="role-desc">{{ role.desc }}</p>
+        <ul class="role-perks">
+          <li *ngFor="let perk of role.perks">✅ {{ perk }}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2 class="cta-title">Prêt à évaluer votre équipe ?</h2>
+    <p class="cta-subtitle">Créez votre compte gratuitement et commencez dès aujourd'hui.</p>
+    <a routerLink="/register" class="btn-primary btn-lg">Créer mon compte →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>🧩 MaturityApp</span>
+    <span>© 2025 — Tous droits réservés</span>
+  </footer>
+
+</div>

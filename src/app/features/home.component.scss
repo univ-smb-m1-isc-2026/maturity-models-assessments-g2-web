@@ -1,0 +1,189 @@
+// ── Variables ─────────────────────────────────────
+$primary:#6366f1;
+$primary-dark:#4f46e5;
+$text:#1e1b4b;
+$text-light:#6b7280;
+
+// ── Mixins utiles ─────────────────────────────────
+@mixin card($bg:#fff) {
+  background:$bg;
+  border-radius:1.25rem;
+  border:1px solid #e0e7ff;
+}
+
+@mixin hover-lift {
+  transition:.2s;
+  &:hover {
+    transform:translateY(-4px);
+    box-shadow:0 12px 32px rgba($primary,.12);
+  }
+}
+
+// ── HERO ──────────────────────────────────────────
+.hero {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:4rem;padding:6rem 4rem;min-height:85vh;
+  background:linear-gradient(135deg,#faf5ff,#ede9fe,#e0e7ff);
+
+  .hero-content {
+    flex:1;max-width:560px;
+
+    .hero-badge {
+      display:inline-block;padding:.4rem 1rem;
+      background:#ede9fe;color:$primary-dark;
+      border-radius:999px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem;
+    }
+
+    .hero-title {
+      font-size:3.5rem;font-weight:900;color:$text;
+      line-height:1.15;margin-bottom:1.25rem;letter-spacing:-1px;
+    }
+
+    .hero-subtitle {
+      font-size:1.15rem;color:$text-light;
+      line-height:1.7;margin-bottom:2.5rem;
+    }
+
+    .hero-actions { display:flex;gap:1rem;flex-wrap:wrap; }
+  }
+
+  .hero-visual {
+    flex:1;display:flex;justify-content:center;
+
+    .visual-card {
+      @include card;
+      padding:2rem;width:380px;
+      box-shadow:0 20px 60px rgba($primary,.18);
+
+      .visual-header {
+        display:flex;align-items:center;gap:.4rem;margin-bottom:1.5rem;
+
+        .visual-dot {
+          width:12px;height:12px;border-radius:50%;
+          &.red{background:#ef4444}
+          &.yellow{background:#eab308}
+          &.green{background:#22c55e}
+        }
+
+        .visual-title { margin-left:.5rem;font-size:.9rem;font-weight:700;color:$text; }
+      }
+
+      .visual-level {
+        display:flex;align-items:center;gap:.75rem;
+
+        .level-label { width:80px;font-size:.8rem;font-weight:600;color:$text; }
+        .level-pct { width:36px;text-align:right;font-size:.75rem;color:$text-light; }
+
+        .level-bar {
+          flex:1;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;
+
+          .level-fill { height:100%;border-radius:999px;transition:width .6s; }
+        }
+      }
+
+      .visual-levels { display:flex;flex-direction:column;gap:.85rem; }
+    }
+  }
+}
+
+// ── FEATURES & ROLES (mutualisé) ─────────────────
+.features,.roles {
+  padding:5rem 4rem;text-align:center;
+
+  &-title {
+    font-size:2rem;font-weight:800;color:$text;margin-bottom:3rem;
+  }
+
+  &-grid {
+    display:grid;gap:1.5rem;
+    grid-template-columns:repeat(3,1fr);
+    max-width:1100px;margin:auto;
+  }
+}
+
+// Features
+.features {
+  .feature-card {
+    @include card(#faf5ff);
+    padding:2rem;text-align:left;
+    @include hover-lift;
+
+    .feature-icon{font-size:2rem;margin-bottom:.75rem}
+    .feature-title{font-size:1rem;font-weight:700;color:$text;margin-bottom:.5rem}
+    .feature-desc{font-size:.875rem;color:$text-light;line-height:1.6}
+  }
+}
+
+// Roles
+.roles {
+  background:linear-gradient(135deg,#f5f3ff,#e0e7ff);
+
+  .role-card {
+    @include card;
+    padding:2rem;text-align:left;
+    box-shadow:0 4px 20px rgba($primary,.08);
+    @include hover-lift;
+
+    .role-icon{font-size:2.5rem;margin-bottom:.75rem}
+    .role-name{font-size:1.1rem;font-weight:800;color:$text;margin-bottom:.5rem}
+    .role-desc{font-size:.875rem;color:$text-light;margin-bottom:1rem;line-height:1.6}
+
+    .role-perks {
+      list-style:none;padding:0;margin:0;
+      display:flex;flex-direction:column;gap:.4rem;
+
+      li{font-size:.85rem;color:$text}
+    }
+  }
+}
+
+// ── CTA ──────────────────────────────────────────
+.cta {
+  padding:5rem 4rem;text-align:center;
+  background:linear-gradient(135deg,$primary,$primary-dark);
+
+  .cta-title{font-size:2.25rem;font-weight:900;color:#fff;margin-bottom:1rem}
+  .cta-subtitle{font-size:1.1rem;color:rgba(255,255,255,.8);margin-bottom:2rem}
+}
+
+// ── FOOTER ───────────────────────────────────────
+.footer {
+  display:flex;justify-content:space-between;
+  padding:1.5rem 4rem;
+  background:$text;color:rgba(255,255,255,.6);
+  font-size:.85rem;
+}
+
+// ── BUTTONS ──────────────────────────────────────
+.btn {
+  display:inline-block;
+  padding:.75rem 1.5rem;
+  border-radius:.75rem;
+  font-weight:700;
+  text-decoration:none;
+  transition:.2s;
+
+  &-primary {
+    background:linear-gradient(135deg,$primary,$primary-dark);
+    color:#fff!important;
+    box-shadow:0 4px 14px rgba($primary,.4);
+
+    &:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba($primary,.5);
+    }
+  }
+
+  &-ghost {
+    background:rgba(255,255,255,.85);
+    color:$text!important;
+    border:2px solid #e0e7ff;
+
+    &:hover { background:#fff;border-color:$primary; }
+  }
+
+  &.btn-lg { padding:1rem 2rem;font-size:1rem; }
+}
+
+// ── Global ───────────────────────────────────────
+.main { min-height:100vh; }

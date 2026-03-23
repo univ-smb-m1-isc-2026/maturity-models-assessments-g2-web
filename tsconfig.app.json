@@ -9,7 +9,8 @@
       "@models/*": ["./src/app/models/*"],
       "@core/*": ["./src/app/core/*"],
       "@features/*": ["./src/app/features/*"]
-    }
+    },
+    "baseUrl": "./"
   },
   "include": [
     "src/**/*.ts"
