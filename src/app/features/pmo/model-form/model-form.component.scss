@@ -6,28 +6,25 @@ $text: #1e1b4b;
 $text-light: #6b7280;
 $border: #e5e7eb;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
-
 $font-display: 'DM Serif Display', Georgia, serif;
-$font-body:    'Sora', system-ui, sans-serif;
+$font-body: 'Sora', system-ui, sans-serif;
 
 * {
-  font-family: $font-body;
   box-sizing: border-box;
+  font-family: $font-body;
 }
 
-
-.form-wrapper {
+.edit-wrapper {
   display: flex;
   justify-content: center;
   min-height: 100vh;
   padding: 2rem;
   background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
 
-  .form-card {
+  .edit-card {
     width: 100%;
-    max-width: 620px;
-    background: rgba(255,255,255,0.9);
+    max-width: 640px;
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     border-radius: 1.5rem;
     padding: 2.5rem;
@@ -58,7 +55,7 @@ $font-body:    'Sora', system-ui, sans-serif;
       }
     }
 
-    .model-form {
+    form.model-form {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -82,9 +79,7 @@ $font-body:    'Sora', system-ui, sans-serif;
           color: $text;
           background: #fff;
           transition: all 0.2s;
-          resize: vertical;
           font-family: inherit;
-
           &:focus {
             outline: none;
             border-color: $primary;
@@ -156,7 +151,7 @@ $font-body:    'Sora', system-ui, sans-serif;
             .btn-remove {
               padding: 0.4rem 0.6rem;
               background: #fff1f2;
-              color: #f43f5e;
+              color: $error;
               border: none;
               border-radius: 0.5rem;
               cursor: pointer;
@@ -169,7 +164,7 @@ $font-body:    'Sora', system-ui, sans-serif;
           }
         }
 
-        .btn-add-level {
+        .btn-add {
           align-self: flex-start;
           padding: 0.5rem 1rem;
           background: #ede9fe;
@@ -185,33 +180,79 @@ $font-body:    'Sora', system-ui, sans-serif;
         }
       }
 
+      // Pagination questions
+      .pagination-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+
+        button {
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 0.75rem;
+          background: #f3f4f6;
+          color: $text;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.2s;
+
+          &:hover:not(:disabled) { background: #e5e7eb; }
+          &:disabled { opacity: 0.4; cursor: not-allowed; }
+        }
+      }
+
+      // Actions questions
+      .question-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .btn-add {
+          background: #ede9fe;
+          color: $primary-dark;
+        }
+        .btn-remove {
+          background: #fff1f2;
+          color: $error;
+        }
+      }
+
       .error-msg {
         font-size: 0.8rem;
         color: $error;
         &::before { content: '⚠ '; }
       }
 
-      .submit-btn {
-        padding: 0.85rem;
-        background: linear-gradient(135deg, $primary, $primary-dark);
-        color: #fff;
-        border: none;
-        border-radius: 0.75rem;
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 4px 14px rgba($primary, 0.4);
-        transition: all 0.2s;
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
 
-        &:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba($primary, 0.5);
+        .btn-secondary {
+          padding: 0.75rem 1rem;
+          border-radius: 0.75rem;
+          background: #f3f4f6;
+          color: $text-light;
+          text-decoration: none;
+          font-weight: 600;
+          &:hover { background: #e5e7eb; }
         }
 
-        &:disabled {
-          background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
-          box-shadow: none;
-          cursor: not-allowed;
+        .btn-primary {
+          padding: 0.85rem 1rem;
+          background: linear-gradient(135deg, $primary, $primary-dark);
+          color: #fff;
+          border-radius: 0.75rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover:not(:disabled) { transform: translateY(-1px); }
+          &:disabled {
+            background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+            cursor: not-allowed;
+          }
         }
       }
     }

@@ -5,7 +5,6 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MaturityModelService } from '@core/maturity-model.service';
 import { AuthService } from '@core/auth.service';
-import { MaturityLevel } from '@models/maturity-model.model';
 import { MaturityModel } from '@models/maturity-model.model';
 import { Question } from '@models/question.model';
 import { User } from '@models/user.model';

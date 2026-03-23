@@ -35,16 +35,6 @@
             <div class="question-header">
               <p class="question-text">{{ question.text }}</p>
             </div>
-
-            <!-- Les niveaux de maturité = options de réponse -->
-           <label class="level-btn" *ngFor="let level of model.levels">
-                <input type="radio"
-                       [name]="'q_' + question.id"
-                       [value]="level"
-                       [disabled]="submitted"/>
-                <span class="lvl-label">{{ level }}</span>
-            </label>
-
           </div><!-- /question-block -->
 
           <!-- ── Submit bar -->

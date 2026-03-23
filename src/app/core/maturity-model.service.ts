@@ -12,13 +12,15 @@ export class MaturityModelService {
       description: 'Modèle basé sur les pratiques Scrum',
       category: 'SCRUM',
       icon: '🔄',
-      levels: ['Initial', 'Répétable', 'Défini', 'Géré', 'Optimisé'],
       createdBy: 1,
       createdAt: new Date(),
       questions: [
-        { id: 1, text: 'Les sprints sont-ils bien définis ?',        order: 1 },
-        { id: 2, text: 'Les rétrospectives sont-elles régulières ?', order: 2 },
-        { id: 3, text: 'Le backlog est-il priorisé ?',               order: 3 },
+        { id: 1, text: 'Les sprints sont-ils bien définis ?',        order: 1,       levels: ['Initial', 'Répétable', 'Défini', 'Géré', 'Optimisé'],
+ },
+        { id: 2, text: 'Les rétrospectives sont-elles régulières ?', order: 2 ,      levels: ['Initial', 'Répétable', 'Défini', 'Géré', 'Optimisé'],
+},
+        { id: 3, text: 'Le backlog est-il priorisé ?',               order: 3,      levels: ['Initial', 'Répétable', 'Défini', 'Géré', 'Optimisé'],
+ },
       ]
     },
     {
@@ -27,13 +29,15 @@ export class MaturityModelService {
       description: 'Modèle basé sur le framework NIST',
       category: 'CYBERSECURITY',
       icon: '🔒',
-      levels: ['Initial', 'Répétable', 'Défini', 'Géré', 'Optimisé'],
       createdBy: 1,
       createdAt: new Date(),
       questions: [
-        { id: 1, text: 'Les accès sont-ils contrôlés ?',            order: 1 },
-        { id: 2, text: 'Les incidents sont-ils tracés ?',           order: 2 },
-        { id: 3, text: 'Les données sensibles sont-elles chiffrées ?', order: 3 },
+        { id: 1, text: 'Les accès sont-ils contrôlés ?', order: 1, levels: ['bon', 'moyen'],   
+},
+        { id: 2, text: 'Les incidents sont-ils tracés ?', order: 2, levels: ['bon', 'moyen'],  
+ },
+        { id: 3, text: 'Les données sensibles sont-elles chiffrées ?', order: 3, levels: ['bon', 'moyen'],   
+ },
       ]
     }
   ];

@@ -112,13 +112,10 @@
             <ul class="questions-list">   <!-- ✅ div + span → ul/li sémantique -->
               <li *ngFor="let question of model.questions">{{ question.text }}</li>
             </ul>
-
-            <div class="model-levels">
-              <span class="level-badge" *ngFor="let level of model.levels">{{ level }}</span>
-            </div>
-          </div>
+          </div> 
 
         </div>
+        
       </div>
     </section>
 

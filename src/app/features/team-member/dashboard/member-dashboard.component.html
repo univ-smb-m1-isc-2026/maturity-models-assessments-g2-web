@@ -65,9 +65,6 @@
           </div>
           <h3 class="model-name">{{ model.title }}</h3>
           <p class="model-desc">{{ model.description ?? 'Aucune description' }}</p>
-          <div class="model-levels">
-            <span class="level-badge" *ngFor="let level of model.levels">{{ level }}</span>
-          </div>
           <div class="model-meta">
             <span>📝 {{ model.questions.length }} question(s)</span>
           </div>

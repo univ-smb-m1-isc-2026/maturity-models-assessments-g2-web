@@ -1,81 +1,125 @@
-<div class="form-wrapper">
-  <div class="form-card">
+<div class="edit-wrapper">
+  <div class="edit-card">
 
-    <div class="form-header">
-      <a routerLink="/pmo/dashboard" class="back-link">← Retour</a>
-      <h2 class="form-title">{{ isEditMode ? '✏️ Modifier le modèle' : '➕ Nouveau modèle' }}</h2>
-      <p class="form-subtitle">Définissez votre modèle de maturité</p>
+    <!-- Loading -->
+    <div class="fetching-state" *ngIf="isFetching">
+      <span class="spinner">⏳</span>
+      <p>Chargement du modèle...</p>
     </div>
 
-    <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
+    <ng-container *ngIf="!isFetching">
 
-      <!-- Titre -->
-      <div class="form-group">
-        <label>Titre du modèle</label>
-        <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé" />
-        <p class="error-msg" *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched">
-          Titre requis (3 caractères minimum)
+      <!-- Header -->
+      <div class="form-header">
+        <a routerLink="/pmo/dashboard" class="back-link">← Retour au dashboard</a>
+        <h2 class="form-title">
+          {{ isEditMode ? '✏️ Modifier le modèle' : '➕ Nouveau modèle' }}
+        </h2>
+        <p class="form-subtitle">
+          {{ isEditMode ? 'Mettez à jour les informations de votre modèle' : 'Créez votre modèle de maturité' }}
         </p>
       </div>
 
-      <!-- Description -->
-      <div class="form-group">
-        <label>Description <span class="optional">(optionnel)</span></label>
-        <textarea formControlName="description" placeholder="Décrivez les objectifs de ce modèle..." rows="3"></textarea>
-      </div>
+      <!-- Form -->
+      <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
 
-      <!-- Catégorie -->
-      <div class="form-group">
-        <label>Catégorie</label>
-        <div class="category-grid">
-          <button
-            type="button"
-            class="category-btn"
-            *ngFor="let cat of categories"
-            [class.selected]="modelForm.get('category')?.value === cat.value"
-            (click)="modelForm.patchValue({ category: cat.value })"
-          >
-            <span class="cat-icon">{{ cat.icon }}</span>
-            <span class="cat-label">{{ cat.label }}</span>
+        <!-- Titre -->
+        <div class="form-group">
+          <label>Titre du modèle</label>
+          <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé" />
+          <p class="error-msg" *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched">
+            Titre requis (3 caractères minimum)
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label>Description <span class="optional">(optionnel)</span></label>
+          <textarea formControlName="description" placeholder="Décrivez les objectifs..." rows="3"></textarea>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="form-group">
+          <label>Catégorie</label>
+          <div class="category-grid">
+            <button
+              type="button"
+              class="category-btn"
+              *ngFor="let cat of categories"
+              [class.selected]="modelForm.get('category')?.value === cat.value"
+              (click)="modelForm.patchValue({ category: cat.value })"
+            >
+              <span class="cat-icon">{{ cat.icon }}</span>
+              <span class="cat-label">{{ cat.label }}</span>
+            </button>
+          </div>
+          <p class="error-msg" *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched">
+            Catégorie requise
+          </p>
+        </div>
+
+        <!-- Questions (Pagination) -->
+        <div class="form-group" formArrayName="questions">
+          <label>Questions du modèle</label>
+
+          <!-- Question courante -->
+      <div class="question-item" [formGroup]="currentQuestion">
+
+            <span class="question-number">
+              Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+            </span>
+
+            <!-- Texte question -->
+            <input type="text" formControlName="text" placeholder="Saisissez votre question..." />
+            <p class="error-msg" *ngIf="questions.at(currentQuestionIndex).get('text')?.invalid && questions.at(currentQuestionIndex).get('text')?.touched">
+              Texte de la question requis
+            </p>
+
+            <!-- Niveaux -->
+            <div formArrayName="levels" class="levels-list">
+              <div class="level-item" *ngFor="let level of getLevels(currentQuestionIndex).controls; let j = index">
+                <span class="level-number">{{ j + 1 }}</span>
+                <input type="text" [formControlName]="j" placeholder="Niveau..." />
+                <button type="button" class="btn-remove"
+                  (click)="removeLevel(currentQuestionIndex, j)"
+                  [disabled]="getLevels(currentQuestionIndex).length === 1">✕</button>
+              </div>
+            </div>
+
+            <button type="button" class="btn-add" (click)="addLevel(currentQuestionIndex)">
+              ➕ Ajouter un niveau
+            </button>
+
+          </div>
+
+          <!-- Pagination questions -->
+          <div class="pagination-controls">
+            <button type="button" (click)="prevQuestion()" [disabled]="currentQuestionIndex === 0">⬅ Précédent</button>
+            <button type="button" (click)="nextQuestion()" [disabled]="currentQuestionIndex === questions.length - 1">Suivant ➡</button>
+          </div>
+
+          <!-- Actions questions -->
+          <div class="question-actions">
+            <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
+            <button type="button" class="btn-remove"
+              (click)="removeQuestion(currentQuestionIndex)"
+              [disabled]="questions.length === 1">🗑 Supprimer cette question</button>
+          </div>
+        </div>
+
+        <!-- Erreur globale -->
+        <p class="error-msg global" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <!-- Actions formulaire -->
+        <div class="form-actions">
+          <a routerLink="/pmo/dashboard" class="btn-secondary">Annuler</a>
+          <button type="submit" class="btn-primary" [disabled]="modelForm.invalid || isLoading">
+            {{ isLoading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer le modèle') }}
           </button>
         </div>
-        <p class="error-msg" *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched">
-          Catégorie requise
-        </p>
-      </div>
 
-      <!-- Niveaux -->
-      <div class="form-group">
-        <label>Niveaux de maturité</label>
-        <div class="levels-list" formArrayName="levels">
-          <div class="level-item" *ngFor="let level of levels.controls; let i = index">
-            <span class="level-number">{{ i + 1 }}</span>
-            <input type="text" [formControlName]="i" placeholder="Ex: Initial, Défini..." />
-            <button type="button" class="btn-remove" (click)="removeLevel(i)" [disabled]="levels.length === 1">✕</button>
-          </div>
-        </div>
-        <button type="button" class="btn-add" (click)="addLevel()">➕ Ajouter un niveau</button>
-      </div>
+      </form>
+    </ng-container>
 
-      <!-- Questions -->
-      <div class="form-group">
-        <label>Questions du modèle</label>
-        <div class="questions-list" formArrayName="questions">
-          <div class="question-item" *ngFor="let question of questions.controls; let i = index" [formGroupName]="i">
-            <span class="question-number">Q{{ i + 1 }}</span>
-            <input type="text" formControlName="text" placeholder="Saisissez votre question..." />
-            <button type="button" class="btn-remove" (click)="removeQuestion(i)" [disabled]="questions.length === 1">✕</button>
-          </div>
-        </div>
-        <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
-      </div>
-
-      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
-
-      <button type="submit" class="submit-btn" [disabled]="modelForm.invalid || isLoading">
-        {{ isLoading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer le modèle') }}
-      </button>
-
-    </form>
   </div>
 </div>

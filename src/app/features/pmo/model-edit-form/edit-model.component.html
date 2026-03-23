@@ -1,7 +1,7 @@
 <div class="edit-wrapper">
   <div class="edit-card">
 
-    <!-- Loading initial -->
+    <!-- Loading -->
     <div class="fetching-state" *ngIf="isFetching">
       <span class="spinner">⏳</span>
       <p>Chargement du modèle...</p>
@@ -10,17 +10,17 @@
     <ng-container *ngIf="!isFetching">
 
       <div class="form-header">
-        <a routerLink="/pmo/dashboard" class="back-link">← Retour au dashboard</a>
+        <a routerLink="/pmo/dashboard" class="back-link">← Retour</a>
         <h2 class="form-title">✏️ Modifier le modèle</h2>
-        <p class="form-subtitle">Mettez à jour les informations de votre modèle</p>
+        <p class="form-subtitle">Mettez à jour les informations</p>
       </div>
 
       <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
 
-        <!-- Titre -->
+        <!-- Title -->
         <div class="form-group">
           <label>Titre du modèle</label>
-          <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé" />
+          <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé">
           <p class="error-msg" *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched">
             Titre requis (3 caractères minimum)
           </p>
@@ -29,20 +29,17 @@
         <!-- Description -->
         <div class="form-group">
           <label>Description <span class="optional">(optionnel)</span></label>
-          <textarea formControlName="description" placeholder="Décrivez les objectifs de ce modèle..." rows="3"></textarea>
+          <textarea formControlName="description" rows="3" placeholder="Décrivez les objectifs"></textarea>
         </div>
 
-        <!-- Catégorie -->
+        <!-- Category -->
         <div class="form-group">
           <label>Catégorie</label>
           <div class="category-grid">
-            <button
-              type="button"
-              class="category-btn"
+            <button type="button" class="category-btn"
               *ngFor="let cat of categories"
               [class.selected]="modelForm.get('category')?.value === cat.value"
-              (click)="modelForm.patchValue({ category: cat.value })"
-            >
+              (click)="modelForm.patchValue({ category: cat.value })">
               <span class="cat-icon">{{ cat.icon }}</span>
               <span class="cat-label">{{ cat.label }}</span>
             </button>
@@ -52,34 +49,55 @@
           </p>
         </div>
 
-        <!-- Niveaux -->
+        <!-- Levels -->
         <div class="form-group">
-          <label>Niveaux de maturité</label>
+          <label>Niveaux</label>
           <div class="levels-list" formArrayName="levels">
             <div class="level-item" *ngFor="let level of levels.controls; let i = index">
               <span class="item-number">{{ i + 1 }}</span>
-              <input type="text" [formControlName]="i" placeholder="Ex: Initial, Défini..." />
-              <button type="button" class="btn-remove" (click)="removeLevel(i)" [disabled]="levels.length === 1">✕</button>
+              <input type="text" [formControlName]="i">
+              <button type="button" class="btn-remove" (click)="removeLevel(i)" [disabled]="levels.length===1">✕</button>
             </div>
           </div>
           <button type="button" class="btn-add" (click)="addLevel()">➕ Ajouter un niveau</button>
         </div>
 
         <!-- Questions -->
-        <div class="form-group">
-          <label>Questions du modèle</label>
-          <div class="questions-list" formArrayName="questions">
-            <div class="question-item" *ngFor="let q of questions.controls; let i = index" [formGroupName]="i">
-              <span class="item-number">Q{{ i + 1 }}</span>
-              <input type="text" formControlName="text" placeholder="Saisissez votre question..." />
-              <button type="button" class="btn-remove" (click)="removeQuestion(i)" [disabled]="questions.length === 1">✕</button>
+        <div class="form-group" formArrayName="questions">
+          <label>Questions</label>
+
+          <div class="question-item" [formGroupName]="currentQuestionIndex">
+            <span class="question-number">
+              Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+            </span>
+            <input type="text" formControlName="text" placeholder="Saisissez votre question...">
+
+            <div formArrayName="answers" class="answers-list">
+              <div class="answer-item" *ngFor="let answer of getAnswers(currentQuestionIndex).controls; let j = index">
+                <input type="text" [formControlName]="j" placeholder="Réponse...">
+                <button type="button" class="btn-remove" (click)="removeAnswer(currentQuestionIndex,j)" [disabled]="getAnswers(currentQuestionIndex).length===1">✕</button>
+              </div>
             </div>
+            <button type="button" class="btn-add" (click)="addAnswer(currentQuestionIndex)">➕ Ajouter une réponse</button>
           </div>
-          <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
+
+          <!-- Pagination -->
+          <div class="pagination-controls">
+            <button type="button" (click)="prevQuestion()" [disabled]="currentQuestionIndex===0">⬅ Précédent</button>
+            <button type="button" (click)="nextQuestion()" [disabled]="currentQuestionIndex===questions.length-1">Suivant ➡</button>
+          </div>
+
+          <!-- Actions question -->
+          <div class="question-actions">
+            <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
+            <button type="button" class="btn-remove" (click)="removeQuestion(currentQuestionIndex)" [disabled]="questions.length===1">🗑 Supprimer cette question</button>
+          </div>
         </div>
 
+        <!-- Erreur -->
         <p class="error-msg global" *ngIf="errorMessage">{{ errorMessage }}</p>
 
+        <!-- Actions -->
         <div class="form-actions">
           <a routerLink="/pmo/dashboard" class="btn-secondary">Annuler</a>
           <button type="submit" class="btn-primary" [disabled]="modelForm.invalid || isLoading">
