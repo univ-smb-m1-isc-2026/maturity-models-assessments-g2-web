@@ -9,6 +9,7 @@ import { LoginComponent } from '@features/auth/login/login.component';
 import { RegisterComponent } from '@features/auth/register/register.component';
 import { HomeComponent } from '@features/home.component';
 // Guards
+import { AuthGuard} from '@core/auth.guard';
 import { RoleGuard } from '@core/role.guard';
 
 // app.routes.ts
@@ -18,9 +19,6 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
 
   // ...autres routes
-  { path: '**', redirectTo: '' },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
   {
     path: 'member/dashboard',
     component: TeamMemberDashboardComponent,
@@ -29,15 +27,15 @@ export const routes: Routes = [
   {
     path: 'pmo/dashboard',
     component: PmoDashboardComponent,
-    //canActivate: [AuthGuard, RoleGuard],
+    canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['PMO'] }
   },
-  {
+  //{
     //path: 'pmo/team',
     //component: TeamManagementComponent,
    // canActivate: [AuthGuard, RoleGuard],
     //data: { roles: ['PMO'] }
-  },
+  //},
   {
     path: 'lead/dashboard',
     component: TeamLeadDashboardComponent,
