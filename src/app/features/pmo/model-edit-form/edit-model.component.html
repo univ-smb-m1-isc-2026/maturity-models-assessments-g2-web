@@ -1,0 +1,94 @@
+<div class="edit-wrapper">
+  <div class="edit-card">
+
+    <!-- Loading initial -->
+    <div class="fetching-state" *ngIf="isFetching">
+      <span class="spinner">⏳</span>
+      <p>Chargement du modèle...</p>
+    </div>
+
+    <ng-container *ngIf="!isFetching">
+
+      <div class="form-header">
+        <a routerLink="/pmo/dashboard" class="back-link">← Retour au dashboard</a>
+        <h2 class="form-title">✏️ Modifier le modèle</h2>
+        <p class="form-subtitle">Mettez à jour les informations de votre modèle</p>
+      </div>
+
+      <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
+
+        <!-- Titre -->
+        <div class="form-group">
+          <label>Titre du modèle</label>
+          <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé" />
+          <p class="error-msg" *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched">
+            Titre requis (3 caractères minimum)
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label>Description <span class="optional">(optionnel)</span></label>
+          <textarea formControlName="description" placeholder="Décrivez les objectifs de ce modèle..." rows="3"></textarea>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="form-group">
+          <label>Catégorie</label>
+          <div class="category-grid">
+            <button
+              type="button"
+              class="category-btn"
+              *ngFor="let cat of categories"
+              [class.selected]="modelForm.get('category')?.value === cat.value"
+              (click)="modelForm.patchValue({ category: cat.value })"
+            >
+              <span class="cat-icon">{{ cat.icon }}</span>
+              <span class="cat-label">{{ cat.label }}</span>
+            </button>
+          </div>
+          <p class="error-msg" *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched">
+            Catégorie requise
+          </p>
+        </div>
+
+        <!-- Niveaux -->
+        <div class="form-group">
+          <label>Niveaux de maturité</label>
+          <div class="levels-list" formArrayName="levels">
+            <div class="level-item" *ngFor="let level of levels.controls; let i = index">
+              <span class="item-number">{{ i + 1 }}</span>
+              <input type="text" [formControlName]="i" placeholder="Ex: Initial, Défini..." />
+              <button type="button" class="btn-remove" (click)="removeLevel(i)" [disabled]="levels.length === 1">✕</button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addLevel()">➕ Ajouter un niveau</button>
+        </div>
+
+        <!-- Questions -->
+        <div class="form-group">
+          <label>Questions du modèle</label>
+          <div class="questions-list" formArrayName="questions">
+            <div class="question-item" *ngFor="let q of questions.controls; let i = index" [formGroupName]="i">
+              <span class="item-number">Q{{ i + 1 }}</span>
+              <input type="text" formControlName="text" placeholder="Saisissez votre question..." />
+              <button type="button" class="btn-remove" (click)="removeQuestion(i)" [disabled]="questions.length === 1">✕</button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
+        </div>
+
+        <p class="error-msg global" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <div class="form-actions">
+          <a routerLink="/pmo/dashboard" class="btn-secondary">Annuler</a>
+          <button type="submit" class="btn-primary" [disabled]="modelForm.invalid || isLoading">
+            {{ isLoading ? 'Enregistrement...' : 'Mettre à jour' }}
+          </button>
+        </div>
+
+      </form>
+    </ng-container>
+
+  </div>
+</div>
