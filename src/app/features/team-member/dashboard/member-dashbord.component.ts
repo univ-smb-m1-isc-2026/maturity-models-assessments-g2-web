@@ -18,7 +18,7 @@ import { SessionStatus } from '@models/status.enum';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './member-dashboard.component.html',
-  //styleUrls: ['../../_dashboard.component.scss']
+  styleUrls: ['../../_dashboard.component.scss']
 })
 export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;

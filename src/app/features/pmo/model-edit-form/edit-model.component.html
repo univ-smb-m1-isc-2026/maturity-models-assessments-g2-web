@@ -10,56 +10,96 @@
     <ng-container *ngIf="!isFetching">
 
       <div class="form-header">
-        <a routerLink="/pmo/dashboard" class="back-link">← Retour</a>
-        <h2 class="form-title">✏️ Modifier le modèle</h2>
+        <a routerLink="/pmo/dashboard" class="back-link">Retour</a>
+        <h2 class="form-title">Modifier le modèle</h2>
         <p class="form-subtitle">Mettez à jour les informations</p>
       </div>
 
       <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
 
-        <!-- Title -->
+        <!-- Titre -->
         <div class="form-group">
-          <label>Titre du modèle</label>
-          <input type="text" formControlName="title" placeholder="Ex: Modèle Scrum Avancé">
-          <p class="error-msg" *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched">
+          <label for="title">Titre du modèle</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Ex: Modèle Scrum Avancé"
+            [attr.aria-invalid]="modelForm.get('title')?.invalid && modelForm.get('title')?.touched ? 'true' : null"
+            aria-describedby="title-error"
+          >
+          <p
+            id="title-error"
+            class="error-msg"
+            *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched"
+            role="alert"
+          >
             Titre requis (3 caractères minimum)
           </p>
         </div>
 
         <!-- Description -->
         <div class="form-group">
-          <label>Description <span class="optional">(optionnel)</span></label>
-          <textarea formControlName="description" rows="3" placeholder="Décrivez les objectifs"></textarea>
+          <label for="description">
+            Description
+            <span class="optional">(optionnel)</span>
+          </label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Décrivez les objectifs"
+          ></textarea>
         </div>
 
-        <!-- Category -->
+        <!-- Catégorie -->
         <div class="form-group">
           <label>Catégorie</label>
-          <div class="category-grid">
-            <button type="button" class="category-btn"
+          <div class="category-grid" role="group" aria-label="Choisir une catégorie">
+            <button
+              type="button"
+              class="category-btn"
               *ngFor="let cat of categories"
               [class.selected]="modelForm.get('category')?.value === cat.value"
-              (click)="modelForm.patchValue({ category: cat.value })">
-              <span class="cat-icon">{{ cat.icon }}</span>
+              (click)="modelForm.patchValue({ category: cat.value })"
+              [attr.aria-pressed]="modelForm.get('category')?.value === cat.value"
+            >
+              <span class="cat-icon" aria-hidden="true">{{ cat.icon }}</span>
               <span class="cat-label">{{ cat.label }}</span>
             </button>
           </div>
-          <p class="error-msg" *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched">
+          <p
+            class="error-msg"
+            *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched"
+            role="alert"
+          >
             Catégorie requise
           </p>
         </div>
 
-        <!-- Levels -->
+        <!-- Niveaux -->
         <div class="form-group">
           <label>Niveaux</label>
           <div class="levels-list" formArrayName="levels">
             <div class="level-item" *ngFor="let level of levels.controls; let i = index">
-              <span class="item-number">{{ i + 1 }}</span>
-              <input type="text" [formControlName]="i">
-              <button type="button" class="btn-remove" (click)="removeLevel(i)" [disabled]="levels.length===1">✕</button>
+              <span class="item-number" aria-hidden="true">{{ i + 1 }}</span>
+              <input
+                type="text"
+                [formControlName]="i"
+                [attr.aria-label]="'Niveau ' + (i + 1)"
+              >
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removeLevel(i)"
+                [disabled]="levels.length === 1"
+                [attr.aria-label]="'Supprimer le niveau ' + (i + 1)"
+              >✕</button>
             </div>
           </div>
-          <button type="button" class="btn-add" (click)="addLevel()">➕ Ajouter un niveau</button>
+          <button type="button" class="btn-add" (click)="addLevel()">
+            + Ajouter un niveau
+          </button>
         </div>
 
         <!-- Questions -->
@@ -67,40 +107,94 @@
           <label>Questions</label>
 
           <div class="question-item" [formGroupName]="currentQuestionIndex">
-            <span class="question-number">
-              Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-            </span>
-            <input type="text" formControlName="text" placeholder="Saisissez votre question...">
 
-            <div formArrayName="answers" class="answers-list">
-              <div class="answer-item" *ngFor="let answer of getAnswers(currentQuestionIndex).controls; let j = index">
-                <input type="text" [formControlName]="j" placeholder="Réponse...">
-                <button type="button" class="btn-remove" (click)="removeAnswer(currentQuestionIndex,j)" [disabled]="getAnswers(currentQuestionIndex).length===1">✕</button>
+            <span class="item-number" aria-hidden="true">
+              {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+            </span>
+
+            <input
+              type="text"
+              formControlName="text"
+              placeholder="Saisissez votre question..."
+              [attr.aria-label]="'Question ' + (currentQuestionIndex + 1)"
+            >
+
+            <div formArrayName="answers" class="questions-list">
+              <div
+                class="question-item"
+                *ngFor="let answer of getAnswers(currentQuestionIndex).controls; let j = index"
+              >
+                <span class="item-number" aria-hidden="true">{{ j + 1 }}</span>
+                <input
+                  type="text"
+                  [formControlName]="j"
+                  placeholder="Réponse..."
+                  [attr.aria-label]="'Réponse ' + (j + 1)"
+                >
+                <button
+                  type="button"
+                  class="btn-remove"
+                  (click)="removeAnswer(currentQuestionIndex, j)"
+                  [disabled]="getAnswers(currentQuestionIndex).length === 1"
+                  [attr.aria-label]="'Supprimer la réponse ' + (j + 1)"
+                >✕</button>
               </div>
             </div>
-            <button type="button" class="btn-add" (click)="addAnswer(currentQuestionIndex)">➕ Ajouter une réponse</button>
+
+            <button type="button" class="btn-add" (click)="addAnswer(currentQuestionIndex)">
+              + Ajouter une réponse
+            </button>
           </div>
 
           <!-- Pagination -->
           <div class="pagination-controls">
-            <button type="button" (click)="prevQuestion()" [disabled]="currentQuestionIndex===0">⬅ Précédent</button>
-            <button type="button" (click)="nextQuestion()" [disabled]="currentQuestionIndex===questions.length-1">Suivant ➡</button>
+            <button
+              type="button"
+              (click)="prevQuestion()"
+              [disabled]="currentQuestionIndex === 0"
+              aria-label="Question précédente"
+            >← Précédent</button>
+
+            <span class="page-indicator" aria-live="polite">
+              {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+            </span>
+
+            <button
+              type="button"
+              (click)="nextQuestion()"
+              [disabled]="currentQuestionIndex === questions.length - 1"
+              aria-label="Question suivante"
+            >Suivant →</button>
           </div>
 
           <!-- Actions question -->
           <div class="question-actions">
-            <button type="button" class="btn-add" (click)="addQuestion()">➕ Ajouter une question</button>
-            <button type="button" class="btn-remove" (click)="removeQuestion(currentQuestionIndex)" [disabled]="questions.length===1">🗑 Supprimer cette question</button>
+            <button type="button" class="btn-add" (click)="addQuestion()">
+              + Ajouter une question
+            </button>
+            <button
+              type="button"
+              class="btn-remove"
+              (click)="removeQuestion(currentQuestionIndex)"
+              [disabled]="questions.length === 1"
+            >Supprimer cette question</button>
           </div>
         </div>
 
-        <!-- Erreur -->
-        <p class="error-msg global" *ngIf="errorMessage">{{ errorMessage }}</p>
+        <!-- Erreur globale -->
+        <p class="error-msg global" *ngIf="errorMessage" role="alert">
+          {{ errorMessage }}
+        </p>
 
         <!-- Actions -->
         <div class="form-actions">
           <a routerLink="/pmo/dashboard" class="btn-secondary">Annuler</a>
-          <button type="submit" class="btn-primary" [disabled]="modelForm.invalid || isLoading">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="modelForm.invalid || isLoading"
+            [attr.aria-busy]="isLoading"
+          >
             {{ isLoading ? 'Enregistrement...' : 'Mettre à jour' }}
           </button>
         </div>

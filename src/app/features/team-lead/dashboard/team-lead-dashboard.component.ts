@@ -15,7 +15,7 @@ import { User } from '@models/user.model';
   standalone: true,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './team-lead-dashboard.component.html',
-  //styleUrls: ['../../_dashboard.component.scss']
+  styleUrls: ['../../_dashboard.component.scss']
 })
 export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;

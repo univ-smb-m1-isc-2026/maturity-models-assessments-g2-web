@@ -1,251 +1,578 @@
-$primary: #6366f1;
-$primary-dark: #4f46e5;
-$primary-glow: rgba(99, 102, 241, 0.2);
-$error: #f43f5e;
-$text: #1e1b4b;
-$text-light: #6b7280;
-$border: #e5e7eb;
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+
+$primary:        #4f46e5;
+$primary-hover:  #4338ca;
+$primary-light:  #eef2ff;
+$primary-glow:   rgba(79, 70, 229, 0.18);
+$primary-border: rgba(79, 70, 229, 0.4);
+
+$error:          #dc2626;
+$error-bg:       #fef2f2;
+$error-border:   #fca5a5;
+
+// Texte — ratios WCAG AA garantis sur fond blanc
+$text:           #111827;   // > 10:1
+$text-secondary: #374151;   // > 7:1
+$text-muted:     #6b7280;   // > 4.5:1
+$text-disabled:  #9ca3af;
+
+$bg-page:        #f5f5f9;
+$bg-card:        #ffffff;
+$bg-input:       #ffffff;
+$bg-subtle:      #f9fafb;
+
+$border:         #d1d5db;
+$border-focus:   $primary;
+
+$radius-sm:      0.5rem;
+$radius-md:      0.75rem;
+$radius-lg:      1rem;
+$radius-xl:      1.25rem;
+
+$shadow-card:    0 1px 3px rgba(0,0,0,.06), 0 4px 20px rgba(79,70,229,.09);
+$shadow-focus:   0 0 0 3px $primary-glow;
+
+$font-display:   'DM Serif Display', Georgia, serif;
+$font-body:      'Sora', system-ui, sans-serif;
+
+$transition:     0.18s ease;
+
+// ─── Google Fonts ─────────────────────────────────────────────────────────────
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
 
-$font-display: 'DM Serif Display', Georgia, serif;
-$font-body:    'Sora', system-ui, sans-serif;
+// ─── Reset minimal ────────────────────────────────────────────────────────────
 
-* {
-  font-family: $font-body;
+*, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: $font-body;
 }
+
+// ─── Focus visible global ─────────────────────────────────────────────────────
+
+:focus-visible {
+  outline: 3px solid $primary;
+  outline-offset: 2px;
+  border-radius: $radius-sm;
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
 
 .edit-wrapper {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   min-height: 100vh;
-  padding: 2rem;
-  background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 50%, #e0e7ff 100%);
+  padding: 2.5rem 1.5rem;
+  background: $bg-page;
+  color: $text;
+}
 
-  .edit-card {
-    width: 100%;
-    max-width: 640px;
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(12px);
-    border-radius: 1.5rem;
-    padding: 2.5rem;
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12);
-    animation: fadeInUp 0.4s ease;
-    height: fit-content;
+// ─── Carte principale ─────────────────────────────────────────────────────────
 
-    // ✅ Loading state
-    .fetching-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 4rem 0;
-      color: $text-light;
+.edit-card {
+  width: 100%;
+  max-width: 640px;
+  background: $bg-card;
+  border: 1px solid rgba($primary, .1);
+  border-radius: $radius-xl;
+  padding: 2.5rem;
+  box-shadow: $shadow-card;
+  animation: fadeInUp 0.35s ease both;
+  height: fit-content;
 
-      .spinner { font-size: 2.5rem; animation: spin 1.5s linear infinite; }
-      p { font-size: 1rem; font-weight: 500; }
-    }
+  @media (max-width: 600px) {
+    padding: 1.75rem 1.25rem;
+    border-radius: $radius-lg;
+  }
+}
 
-    .form-header {
-      margin-bottom: 2rem;
+// ─── État de chargement ───────────────────────────────────────────────────────
 
-      .back-link {
-        font-size: 0.85rem;
-        color: $text-light;
-        text-decoration: none;
-        transition: color 0.2s;
-        &:hover { color: $primary; }
-      }
+.fetching-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: $text-muted;
 
-      .form-title {
-        font-size: 1.6rem;
-        font-weight: 900;
-        color: $text;
-        margin-top: 0.75rem;
-        letter-spacing: -0.5px;
-      }
+  .spinner {
+    font-size: 2.5rem;
+    animation: spin 1.5s linear infinite;
+  }
 
-      .form-subtitle {
-        color: $text-light;
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-      }
-    }
+  p {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+}
 
-    .model-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+// ─── En-tête ──────────────────────────────────────────────────────────────────
 
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+.form-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $border;
 
-        label {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: $text;
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-muted;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color $transition;
 
-          .optional {
-            font-weight: 400;
-            color: $text-light;
-            font-size: 0.8rem;
-          }
-        }
+    &::before { content: '←'; }
+    &:hover { color: $primary; }
+  }
 
-        input, textarea {
-          padding: 0.75rem 1rem;
-          border: 1.5px solid $border;
-          border-radius: 0.75rem;
-          font-size: 0.95rem;
-          color: $text;
-          background: #fff;
-          transition: all 0.2s;
-          outline: none;
-          resize: vertical;
-          font-family: inherit;
+  .form-title {
+    font-family: $font-display;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: $text;
+    margin-top: 0.85rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
 
-          &::placeholder { color: #c4c4d4; }
+  .form-subtitle {
+    margin-top: 0.35rem;
+    font-size: 0.875rem;
+    color: $text-secondary;
+    line-height: 1.5;
+  }
+}
 
-          &:focus {
-            border-color: $primary;
-            box-shadow: 0 0 0 4px $primary-glow;
-          }
-        }
+// ─── Formulaire ───────────────────────────────────────────────────────────────
 
-        // Catégories
-        .category-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 0.75rem;
+.model-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
 
-          .category-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.75rem;
-            border: 1.5px solid $border;
-            border-radius: 0.75rem;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
+// ─── Groupe de champ ──────────────────────────────────────────────────────────
 
-            .cat-icon  { font-size: 1.5rem; }
-            .cat-label { font-size: 0.75rem; font-weight: 600; color: $text-light; }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 
-            &:hover { border-color: $primary; background: #faf5ff; }
+  label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $text-secondary;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 
-            &.selected {
-              border-color: $primary;
-              background: #ede9fe;
-              .cat-label { color: $primary-dark; }
-            }
-          }
-        }
-
-        // Niveaux + Questions
-        .levels-list,
-        .questions-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .level-item,
-        .question-item {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-
-          .item-number {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: $primary;
-            color: #fff;
-            border-radius: 50%;
-            font-size: 0.75rem;
-            font-weight: 700;
-            flex-shrink: 0;
-          }
-
-          input { flex: 1; margin: 0; }
-
-          .btn-remove {
-            padding: 0.4rem 0.6rem;
-            background: #fff1f2;
-            color: #f43f5e;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-
-            &:hover:not(:disabled) { background: #ffe4e6; }
-            &:disabled { opacity: 0.3; cursor: not-allowed; }
-          }
-        }
-
-        .btn-add {
-          align-self: flex-start;
-          padding: 0.5rem 1rem;
-          background: #ede9fe;
-          color: $primary-dark;
-          border: none;
-          border-radius: 0.75rem;
-          font-size: 0.85rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-
-          &:hover { background: #ddd6fe; }
-        }
-      }
-
-      .error-msg {
-        font-size: 0.8rem;
-        color: $error;
-        font-weight: 500;
-        &::before { content: '⚠ '; }
-
-        &.global { text-align: center; }
-      }
-
-      .form-actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 0.5rem;
-
-        a, button { flex: 1; text-align: center; }
-      }
+    .optional {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: $text-muted;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 0.35rem;
     }
   }
 }
 
-.btn-primary {
-  padding: 0.85rem;
-  background: linear-gradient(135deg, $primary, $primary-dark);
-  color: #fff;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba($primary, 0.4);
-  transition: all 0.2s;
+// ─── Inputs & Textareas ───────────────────────────────────────────────────────
 
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba($primary, 0.5);
+input,
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background: $bg-input;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.9rem;
+  color: $text;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+  transition: border-color $transition, box-shadow $transition;
+
+  &::placeholder { color: $text-disabled; }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: darken($border, 10%);
+  }
+
+  &:focus {
+    border-color: $border-focus;
+    box-shadow: $shadow-focus;
   }
 
   &:disabled {
-    background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+    background: $bg-subtle;
+    color: $text-disabled;
+    cursor: not-allowed;
+  }
+
+  &[aria-invalid="true"] {
+    border-color: $error-border;
+    background: $error-bg;
+
+    &:focus { box-shadow: 0 0 0 3px rgba($error, .15); }
+  }
+}
+
+// ─── Grille catégories ────────────────────────────────────────────────────────
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .category-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.85rem 0.5rem;
+    background: $bg-subtle;
+    border: 1.5px solid $border;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: border-color $transition, background $transition, box-shadow $transition;
+
+    .cat-icon  { font-size: 1.4rem; line-height: 1; }
+    .cat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: $text-muted;
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    &:hover {
+      border-color: $primary-border;
+      background: $primary-light;
+      .cat-label { color: $primary; }
+    }
+
+    &.selected {
+      border-color: $primary;
+      background: $primary-light;
+      box-shadow: inset 0 0 0 1px $primary;
+      .cat-label { color: $primary-hover; }
+    }
+
+    &:focus-visible {
+      outline: 3px solid $primary;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ─── Liste niveaux ────────────────────────────────────────────────────────────
+
+.levels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.level-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .item-number {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  input { flex: 1; margin: 0; }
+
+  .btn-remove {
+    padding: 0.4rem 0.65rem;
+    background: $error-bg;
+    color: $error;
+    border: 1px solid $error-border;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition;
+
+    &:hover:not(:disabled) { background: darken($error-bg, 4%); }
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
+  }
+}
+
+// ─── Bloc question (carte) ────────────────────────────────────────────────────
+
+.question-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: $bg-subtle;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+
+  // Champ texte de la question
+  & > input {
+    width: 100%;
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: $bg-card;
+  }
+
+  // Label "Question X / Y"
+  .item-number {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: $primary;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    // Pas de cercle ici — c'est un texte "1 / 3"
+    width: auto;
+    height: auto;
+    background: none;
+    border-radius: 0;
+  }
+}
+
+// ─── Liste des réponses (dans le bloc question) ───────────────────────────────
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid $border;
+  margin-top: 0.25rem;
+
+  // Chaque ligne réponse
+  .question-item {
+    // Réinitialise le style carte pour les sous-items réponses
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    gap: 0.6rem;
+
+    .item-number {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: $border;
+      color: $text-secondary;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input { flex: 1; margin: 0; font-size: 0.875rem; }
+
+    .btn-remove {
+      padding: 0.4rem 0.65rem;
+      background: $error-bg;
+      color: $error;
+      border: 1px solid $error-border;
+      border-radius: $radius-sm;
+      font-family: $font-body;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background $transition;
+
+      &:hover:not(:disabled) { background: darken($error-bg, 4%); }
+      &:disabled { opacity: 0.35; cursor: not-allowed; }
+    }
+  }
+}
+
+// ─── Pagination questions ─────────────────────────────────────────────────────
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: $bg-card;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  margin-top: 0.5rem;
+
+  .page-indicator {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  button {
+    padding: 0.45rem 1rem;
+    background: $primary-light;
+    color: $primary-hover;
+    border: 1.5px solid $primary-border;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition, border-color $transition;
+
+    &:hover:not(:disabled) {
+      background: darken($primary-light, 4%);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ─── Actions question (ajouter / supprimer) ───────────────────────────────────
+
+.question-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+
+  // Bouton "Supprimer cette question" — rouge explicite
+  .btn-remove {
+    padding: 0.45rem 0.9rem;
+    background: $error-bg;
+    color: $error;
+    border: 1.5px solid $error-border;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition, border-color $transition;
+
+    &:hover:not(:disabled) {
+      background: darken($error-bg, 4%);
+      border-color: darken($error-border, 6%);
+    }
+
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
+  }
+}
+
+// ─── Bouton ajouter ───────────────────────────────────────────────────────────
+
+.btn-add {
+  align-self: flex-start;
+  padding: 0.45rem 0.9rem;
+  background: $primary-light;
+  color: $primary-hover;
+  border: 1.5px solid $primary-border;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background $transition, border-color $transition;
+
+  &:hover { background: darken($primary-light, 4%); }
+}
+
+// ─── Message d'erreur ─────────────────────────────────────────────────────────
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $error;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-color: $error;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+  }
+
+  &.global { justify-content: center; }
+}
+
+// ─── Actions du formulaire ────────────────────────────────────────────────────
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $border;
+
+  a, button { flex: 1; text-align: center; }
+}
+
+// ─── Boutons globaux ──────────────────────────────────────────────────────────
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background $transition, box-shadow $transition, transform $transition;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+    box-shadow: 0 4px 14px rgba($primary, .35);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    background: #c7d2fe;
+    color: #fff;
     box-shadow: none;
     cursor: not-allowed;
   }
@@ -253,22 +580,28 @@ $font-body:    'Sora', system-ui, sans-serif;
 
 .btn-secondary {
   display: inline-block;
-  padding: 0.85rem;
-  background: #f3f4f6;
-  color: $text;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: $bg-subtle;
+  color: $text-secondary;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.9rem;
   font-weight: 600;
-  cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: background $transition, border-color $transition;
 
-  &:hover { background: #e5e7eb; }
+  &:hover {
+    background: darken($bg-subtle, 3%);
+    border-color: darken($border, 8%);
+  }
 }
 
+// ─── Animations ───────────────────────────────────────────────────────────────
+
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
