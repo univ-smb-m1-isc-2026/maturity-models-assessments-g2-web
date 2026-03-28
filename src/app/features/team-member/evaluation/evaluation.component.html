@@ -1,12 +1,13 @@
 <div class="dashboard-wrapper">
+
   <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
   <aside class="sidebar">
     <div class="sidebar-logo">🧩 MaturityApp</div>
     <nav class="sidebar-nav">
-      <a class="nav-item" routerLink="/member/dashboard">
+      <a class="nav-item active" routerLink="/member/dashboard">
         <span class="nav-icon">📊</span> Dashboard
       </a>
-      <a class="nav-item" routerLink="/member/evaluations">
+      <a class="nav-item" routerLink="/member/evaluation">
         <span class="nav-icon">📝</span> Mes évaluations
       </a>
     </nav>
@@ -18,40 +19,34 @@
   <!-- ── Page content ─────────────────────────────────────────────────────── -->
   <div class="page-content">
 
+    <!-- ═══════════════════════════════════════ LOADING STATE -->
+    <div class="state-overlay" *ngIf="isFetching">
+      <div class="loader-ring"></div>
+      <p>Chargement du modèle…</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ ERROR STATE -->
+    <div class="state-banner state-banner--error" *ngIf="errorMessage && !isFetching">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
     <!-- ═══════════════════════════════════════ MAIN CONTENT -->
     <main class="eval-main" *ngIf="!isFetching && model">
 
       <!-- ── Model header -->
       <section class="model-hero">
-        <h1 class="model-hero__title">{{ model.title }}</h1>
-        <p class="model-hero__desc" *ngIf="model.description">{{ model.description }}</p>
+        <span class="model-hero__icon">{{ model.icon }}</span>
+        <div>
+          <p class="model-hero__category">{{ model.category }}</p>
+          <h1 class="model-hero__title">{{ model.title }}</h1>
+          <p class="model-hero__desc" *ngIf="model.description">{{ model.description }}</p>
+        </div>
       </section>
 
-      <!-- ─────────────── EVALUATION STEP ─────────────── -->
-      <ng-template #evaluationStep>
-             <!-- Itération sur les questions -->
-          <div class="question-block" *ngFor="let question of model.questions">
-
-            <div class="question-header">
-              <p class="question-text">{{ question.text }}</p>
-            </div>
-          </div><!-- /question-block -->
-
-          <!-- ── Submit bar -->
-          <div class="submit-bar" *ngIf="!submitted">
-            <button class="btn btn--primary btn--lg"
-                    (click)="submitEvaluation()"
-                    [disabled]="isLoading"
-                    [class.btn--loading]="isLoading">
-              <span *ngIf="!isLoading">Soumettre l'évaluation</span>
-              <span class="btn-spinner" *ngIf="isLoading"></span>
-            </button>
-            <p class="submit-hint">Vos réponses seront définitivement enregistrées.</p>
-        </div>
-
-      </ng-template>
-      <!-- /evaluationStep -->
-      
       <!-- ─────────────── RESULT STEP ─────────────── -->
       <ng-container *ngIf="isResultStep; else evaluationStep">
         <section class="result-section">
@@ -72,8 +67,80 @@
           </div>
         </section>
       </ng-container>
-      
+
+      <!-- ─────────────── EVALUATION STEP ─────────────── -->
+      <ng-template #evaluationStep>
+
+        <section class="levels-section" *ngIf="model.questions?.length; else noQuestions">
+
+          <!-- Itération sur les questions (triées par order) -->
+          <div class="question-block"
+               *ngFor="let question of model.questions | slice:0; let qi = index">
+
+            <div class="question-header">
+              <span class="question-index">Q{{ question.order ?? qi + 1 }}</span>
+              <p class="question-text">{{ question.text }}</p>
+            </div>
+
+            <!-- Les levels = string[] sur la question = options de réponse -->
+            <div class="levels-row" *ngIf="question.levels?.length; else noLevels">
+              <label class="level-btn"
+                     *ngFor="let level of question.levels; let li = index">
+                <input type="radio"
+                       [name]="'q_' + question.id"
+                       [value]="level"
+                       [disabled]="submitted"/>
+                <div class="level-color-bar" [ngClass]="'lvl-' + (li + 1)"></div>
+                <span class="lvl-num">N{{ li + 1 }}</span>
+                <span class="lvl-label">{{ level }}</span>
+              </label>
+            </div>
+
+            <ng-template #noLevels>
+              <p class="empty-hint">Aucun niveau défini pour cette question.</p>
+            </ng-template>
+
+          </div><!-- /question-block -->
+
+          <!-- ── Submit bar -->
+          <div class="submit-bar" *ngIf="!submitted">
+            <button class="btn btn--primary btn--lg"
+                    (click)="submitEvaluation()"
+                    [disabled]="isLoading"
+                    [class.btn--loading]="isLoading">
+              <span *ngIf="!isLoading">Soumettre l'évaluation</span>
+              <span class="btn-spinner" *ngIf="isLoading"></span>
+            </button>
+            <p class="submit-hint">Vos réponses seront définitivement enregistrées.</p>
+          </div>
+
+        </section>
+
+        <ng-template #noQuestions>
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 12h8M8 8h5M8 16h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <p>Ce modèle ne contient pas encore de questions.</p>
+            <a routerLink="/member/dashboard" class="btn btn--ghost">Retour au tableau de bord</a>
+          </div>
+        </ng-template>
+
+      </ng-template>
+      <!-- /evaluationStep -->
+
     </main>
+
+    <!-- ═══════════════════════════════════════ NO MODEL STATE -->
+    <div class="state-overlay state-overlay--empty" *ngIf="!isFetching && !model && !errorMessage">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <p>Modèle introuvable.</p>
+      <a routerLink="/member/dashboard" class="btn btn--ghost">Retour</a>
+    </div>
 
   </div><!-- /page-content -->
 

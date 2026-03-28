@@ -6,26 +6,27 @@ import { takeUntil } from 'rxjs/operators';
 import { MaturityModelService } from '@core/maturity-model.service';
 import { AuthService } from '@core/auth.service';
 import { MaturityModel } from '@models/maturity-model.model';
-import { Question } from '@models/question.model';
 import { User } from '@models/user.model';
 
-
 @Component({
-  selector: 'app-team-member-dashboard',
+  selector: 'app-evaluation',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './evaluation.component.html',
   styleUrls: ['./evaluation.component.scss']
 })
 export class EvaluationComponent implements OnInit, OnDestroy {
-  currentUser : User | null = null; 
-  errorMessage: string = "";
-  isFetching: boolean = false; 
-  isLoading: boolean = false; 
-  submitted: boolean = false; 
-  isResultStep: boolean = false; 
+  currentUser: User | null = null;
+  errorMessage: string = '';
+  isFetching: boolean = false;
+  isLoading: boolean = false;
+  submitted: boolean = false;
+  isResultStep: boolean = false;
   modelId!: number;
-  model: MaturityModel|null = null ; 
+  model: MaturityModel | null = null;
+
+  // Stocke la réponse choisie par question : { [questionId]: levelString }
+  answers: Record<number, string> = {};
 
   private destroy$ = new Subject<void>();
 
@@ -34,37 +35,66 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
-  ) {
-    this.currentUser = this.authService.getCurrentUser()
-    } 
+  ) { this.currentUser =  this.authService.getCurrentUser()}
 
   ngOnInit(): void {
     this.modelId = Number(this.route.snapshot.paramMap.get('id'));
-      if (!this.modelId) {
-        this.router.navigate(['/member/dashboard']);
-        return;
-      }
 
-    if (this.currentUser) {
-      this.maturityModelService.getModelById(this.modelId).subscribe({
-      next: (model) => {
-        this.model = model ?? null;
-        this.isFetching = false;
-      },
-      error: () => {
-        this.errorMessage = 'Impossible de charger le modèle.';
-        this.isFetching = false;
-      }
+    if (!this.modelId) {
+      this.router.navigate(['/member/dashboard']);
+      return;
+    }
+
+    // Chargement du modèle — indépendant de currentUser
+    this.isFetching = true;
+    this.maturityModelService.getModelById(this.modelId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (model) => {
+          // Trier les questions par order
+          if (model) {
+            model.questions = model.questions
+              .slice()
+              .sort((a, b) => a.order - b.order);
+          }
+          this.model = model ?? null;
+          this.isFetching = false;
+        },
+        error: () => {
+          this.errorMessage = 'Impossible de charger le modèle.';
+          this.isFetching = false;
+        }
       });
-    }
-    }
-
-  getSessionResult(){
-    //get la session result associer à la session
   }
 
-  submitEvaluation(){
-      // ajouter à la session result 
+  selectAnswer(questionId: number, level: string): void {
+    this.answers[questionId] = level;
+  }
+
+  getSessionResult(): void {
+    // TODO : récupérer la session result associée à la session
+  }
+
+  submitEvaluation(): void {
+    if (!this.model) return;
+
+    // Vérifier que toutes les questions ont une réponse
+    const allAnswered = this.model.questions.every(q => this.answers[q.id] !== undefined);
+    if (!allAnswered) {
+      this.errorMessage = 'Veuillez répondre à toutes les questions avant de soumettre.';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    // TODO : envoyer this.answers au service
+    // this.evaluationService.submit(this.modelId, this.answers).subscribe(...)
+
+    console.log('Réponses soumises :', this.answers);
+    this.submitted = true;
+    this.isResultStep = true;
+    this.isLoading = false;
   }
 
   logout(): void {

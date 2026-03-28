@@ -45,7 +45,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.loginForm.value.email,
       this.loginForm.value.password
     ).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$)  
     ).subscribe({
       next: (user) => {
         this.isLoading = false;
