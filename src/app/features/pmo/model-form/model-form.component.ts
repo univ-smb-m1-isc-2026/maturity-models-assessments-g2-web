@@ -186,7 +186,7 @@ export class FormModelComponent implements OnInit, OnDestroy {
     const request$ = this.isEditMode
       ? this.maturityModelService.updateModel(this.modelId, payload)
       : this.maturityModelService.createModel(payload);
-
+    console.log('Request retourned:', request$);
     request$.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.isLoading = false;
