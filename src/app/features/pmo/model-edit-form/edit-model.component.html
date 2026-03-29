@@ -77,109 +77,88 @@
           </p>
         </div>
 
-        <!-- Niveaux -->
-        <div class="form-group">
-          <label>Niveaux</label>
-          <div class="levels-list" formArrayName="levels">
-            <div class="level-item" *ngFor="let level of levels.controls; let i = index">
-              <span class="item-number" aria-hidden="true">{{ i + 1 }}</span>
-              <input
-                type="text"
-                [formControlName]="i"
-                [attr.aria-label]="'Niveau ' + (i + 1)"
-              >
-              <button
-                type="button"
-                class="btn-remove"
-                (click)="removeLevel(i)"
-                [disabled]="levels.length === 1"
-                [attr.aria-label]="'Supprimer le niveau ' + (i + 1)"
-              >✕</button>
-            </div>
-          </div>
-          <button type="button" class="btn-add" (click)="addLevel()">
-            + Ajouter un niveau
-          </button>
-        </div>
-
-        <!-- Questions -->
+        <!--  Questions -->
         <div class="form-group" formArrayName="questions">
           <label>Questions</label>
 
-          <div class="question-item" [formGroupName]="currentQuestionIndex">
+  <!-- ✅ *ngFor sur toutes les questions -->
+  <ng-container *ngFor="let question of questions.controls; let i = index">
 
-            <span class="item-number" aria-hidden="true">
-              {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-            </span>
+    <!-- ✅ *ngIf affiche uniquement la question courante -->
+    <div class="question-item" [formGroupName]="i" *ngIf="i === currentQuestionIndex">
 
-            <input
-              type="text"
-              formControlName="text"
-              placeholder="Saisissez votre question..."
-              [attr.aria-label]="'Question ' + (currentQuestionIndex + 1)"
-            >
+      <span class="item-number">{{ i + 1 }} / {{ questions.length }}</span>
 
-            <div formArrayName="answers" class="questions-list">
-              <div
-                class="question-item"
-                *ngFor="let answer of getAnswers(currentQuestionIndex).controls; let j = index"
-              >
-                <span class="item-number" aria-hidden="true">{{ j + 1 }}</span>
-                <input
-                  type="text"
-                  [formControlName]="j"
-                  placeholder="Réponse..."
-                  [attr.aria-label]="'Réponse ' + (j + 1)"
-                >
-                <button
-                  type="button"
-                  class="btn-remove"
-                  (click)="removeAnswer(currentQuestionIndex, j)"
-                  [disabled]="getAnswers(currentQuestionIndex).length === 1"
-                  [attr.aria-label]="'Supprimer la réponse ' + (j + 1)"
-                >✕</button>
-              </div>
-            </div>
+      <input
+        type="text"
+        formControlName="text"
+        placeholder="Saisissez votre question..."
+        [attr.aria-label]="'Question ' + (i + 1)"
+      >
 
-            <button type="button" class="btn-add" (click)="addAnswer(currentQuestionIndex)">
-              + Ajouter une réponse
-            </button>
-          </div>
-
-          <!-- Pagination -->
-          <div class="pagination-controls">
-            <button
-              type="button"
-              (click)="prevQuestion()"
-              [disabled]="currentQuestionIndex === 0"
-              aria-label="Question précédente"
-            >← Précédent</button>
-
-            <span class="page-indicator" aria-live="polite">
-              {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-            </span>
-
-            <button
-              type="button"
-              (click)="nextQuestion()"
-              [disabled]="currentQuestionIndex === questions.length - 1"
-              aria-label="Question suivante"
-            >Suivant →</button>
-          </div>
-
-          <!-- Actions question -->
-          <div class="question-actions">
-            <button type="button" class="btn-add" (click)="addQuestion()">
-              + Ajouter une question
-            </button>
-            <button
-              type="button"
-              class="btn-remove"
-              (click)="removeQuestion(currentQuestionIndex)"
-              [disabled]="questions.length === 1"
-            >Supprimer cette question</button>
-          </div>
+      <!-- Réponses -->
+      <div formArrayName="answers" class="questions-list">
+        <div
+          class="question-item"
+          *ngFor="let answer of getAnswers(i).controls; let j = index"
+          [formGroupName]="j"
+        >
+          <span class="item-number">{{ j + 1 }}</span>
+          <input
+            type="text"
+            formControlName="value"
+            placeholder="Réponse..."
+            [attr.aria-label]="'Réponse ' + (j + 1)"
+          >
+          <button
+            type="button"
+            class="btn-remove"
+            (click)="removeAnswer(i, j)"
+            [disabled]="getAnswers(i).length === 1"
+          >✕</button>
         </div>
+      </div>
+
+      <button type="button" class="btn-add" (click)="addAnswer(i)">
+        + Ajouter une réponse
+      </button>
+
+    </div>
+  </ng-container>
+
+  <!-- Pagination -->
+  <div class="pagination-controls">
+    <button
+      type="button"
+      (click)="prevQuestion()"
+      [disabled]="currentQuestionIndex === 0"
+    >← Précédent</button>
+
+    <span class="page-indicator">
+      {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+    </span>
+
+    <button
+      type="button"
+      (click)="nextQuestion()"
+      [disabled]="currentQuestionIndex === questions.length - 1"
+    >Suivant →</button>
+  </div>
+
+  <!-- Actions question -->
+  <div class="question-actions">
+    <button type="button" class="btn-add" (click)="addQuestion()">
+      + Ajouter une question
+    </button>
+    <button
+      type="button"
+      class="btn-remove"
+      (click)="removeQuestion(currentQuestionIndex)"
+      [disabled]="questions.length === 1"
+    >Supprimer cette question</button>
+  </div>
+
+</div>
 
         <!-- Erreur globale -->
         <p class="error-msg global" *ngIf="errorMessage" role="alert">

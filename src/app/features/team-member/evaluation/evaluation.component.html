@@ -78,27 +78,9 @@
                *ngFor="let question of model.questions | slice:0; let qi = index">
 
             <div class="question-header">
-              <span class="question-index">Q{{ question.order ?? qi + 1 }}</span>
+              <span class="question-index">Q{{ question.questionOrder ?? qi + 1 }}</span>
               <p class="question-text">{{ question.text }}</p>
             </div>
-
-            <!-- Les levels = string[] sur la question = options de réponse -->
-            <div class="levels-row" *ngIf="question.levels?.length; else noLevels">
-              <label class="level-btn"
-                     *ngFor="let level of question.levels; let li = index">
-                <input type="radio"
-                       [name]="'q_' + question.id"
-                       [value]="level"
-                       [disabled]="submitted"/>
-                <div class="level-color-bar" [ngClass]="'lvl-' + (li + 1)"></div>
-                <span class="lvl-num">N{{ li + 1 }}</span>
-                <span class="lvl-label">{{ level }}</span>
-              </label>
-            </div>
-
-            <ng-template #noLevels>
-              <p class="empty-hint">Aucun niveau défini pour cette question.</p>
-            </ng-template>
 
           </div><!-- /question-block -->
 

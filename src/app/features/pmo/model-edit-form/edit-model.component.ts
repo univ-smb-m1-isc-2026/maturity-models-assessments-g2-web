@@ -6,7 +6,10 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MaturityModelService } from '@core/maturity-model.service';
 import { AuthService } from '@core/auth.service';
-import { MATURITY_CATEGORIES, MaturityCategory } from '@models/maturity-model.model';
+import { MATURITY_CATEGORIES, MaturityCategory, MaturityModel } from '@models/maturity-model.model';
+import { ChangeDetectorRef } from '@angular/core';
+import { Question } from '@models/question.model';
+import { Answer } from '@models/answer.model';
 
 @Component({
   selector: 'app-edit-model',
@@ -33,92 +36,76 @@ export class EditModelComponent implements OnInit, OnDestroy {
     private maturityModelService: MaturityModelService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Initialisation du formulaire
     this.modelForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
       category: ['', Validators.required],
       icon: ['📋'],
-      levels: this.fb.array([]),
       questions: this.fb.array([this.createQuestion()])
     });
 
-    // Mettre à jour les niveaux selon catégorie
-    this.modelForm.get('category')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value: MaturityCategory) => {
-      const found = this.categories.find(c => c.value === value);
-      if (found) {
-        this.modelForm.patchValue({ icon: found.icon });
-        this.levels.clear();
-      }
-    });
+    this.modelForm.get('category')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value: MaturityCategory) => {
+        const found = this.categories.find(c => c.value === value);
+        if (found) this.modelForm.patchValue({ icon: found.icon });
+      });
 
-    // Récupérer l'ID du modèle
     this.modelId = Number(this.route.snapshot.paramMap.get('id'));
     if (!this.modelId) {
       this.router.navigate(['/pmo/dashboard']);
       return;
     }
 
-    // Charger le modèle
-    this.maturityModelService.getModelById(this.modelId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: model => {
-        this.isFetching = false;
-
-        // Formulaire principal
-        this.modelForm.patchValue({
-          title: model.title,
-          description: model.description,
-          category: model.category,
-          icon: model.icon
-        });
-
-        
-
-        // Questions et réponses
-        this.questions.clear();
-        model.questions.forEach((q: any) => this.questions.push(this.createQuestion(q)));
-      },
-      error: () => {
-        this.isFetching = false;
-        this.errorMessage = 'Modèle introuvable';
-      }
-    });
-  }
-
-  // =========================
-  // LEVELS
-  // =========================
-  get levels(): FormArray {
-    return this.modelForm.get('levels') as FormArray;
-  }
-
-  addLevel(): void {
-    this.levels.push(this.fb.control('', Validators.required));
-  }
-
-  removeLevel(index: number): void {
-    if (this.levels.length > 1) this.levels.removeAt(index);
+    this.maturityModelService.getModelById(this.modelId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (model: MaturityModel) => {
+          this.isFetching = false;
+          this.modelForm.patchValue({
+            title: model.title,
+            description: model.description,
+            category: model.category,
+            icon: model.icon
+          });
+          this.questions.clear();
+          if (model.questions?.length) {
+            model.questions.forEach((q: any) => this.questions.push(this.createQuestion(q)));
+          } else {
+            this.questions.push(this.createQuestion());
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isFetching = false;
+          this.errorMessage = 'Modèle introuvable';
+        }
+      });
   }
 
   // =========================
   // QUESTIONS
   // =========================
+
   get questions(): FormArray {
     return this.modelForm.get('questions') as FormArray;
   }
 
   createQuestion(question?: any): FormGroup {
-    return this.fb.group({
-      text: [question?.text || '', Validators.required],
-      answers: this.fb.array(
-        question?.answers?.length ? question.answers.map((a: string) => this.fb.control(a)) : [this.fb.control('')]
-      )
-    });
-  }
+  return this.fb.group({
+    text: [question?.text || '', Validators.required],
+    answers: this.fb.array(
+      question?.answers?.length
+        ? question.answers.map((ans: any) => this.createAnswer(ans))
+        : [this.createAnswer()]
+    )
+  });
+}
 
   addQuestion(): void {
     this.questions.push(this.createQuestion());
@@ -128,19 +115,28 @@ export class EditModelComponent implements OnInit, OnDestroy {
   removeQuestion(index: number): void {
     if (this.questions.length > 1) {
       this.questions.removeAt(index);
-      if (this.currentQuestionIndex >= this.questions.length) this.currentQuestionIndex = this.questions.length - 1;
+      if (this.currentQuestionIndex >= this.questions.length) {
+        this.currentQuestionIndex = this.questions.length - 1;
+      }
     }
   }
 
   // =========================
   // ANSWERS
   // =========================
+
   getAnswers(index: number): FormArray {
     return this.questions.at(index).get('answers') as FormArray;
   }
 
+  createAnswer(answer?: Answer): FormGroup {
+    return this.fb.group({
+      value: [answer?.value || '', Validators.required],
+    });
+  }
+
   addAnswer(questionIndex: number): void {
-    this.getAnswers(questionIndex).push(this.fb.control(''));
+    this.getAnswers(questionIndex).push(this.createAnswer()); // ✅ createAnswer() au lieu de fb.control('')
   }
 
   removeAnswer(questionIndex: number, answerIndex: number): void {
@@ -151,6 +147,7 @@ export class EditModelComponent implements OnInit, OnDestroy {
   // =========================
   // PAGINATION
   // =========================
+
   nextQuestion(): void {
     if (this.currentQuestionIndex < this.questions.length - 1) this.currentQuestionIndex++;
   }
@@ -158,26 +155,37 @@ export class EditModelComponent implements OnInit, OnDestroy {
   prevQuestion(): void {
     if (this.currentQuestionIndex > 0) this.currentQuestionIndex--;
   }
-
-  // =========================
+ // =========================
   // SUBMIT
   // =========================
   onSubmit(): void {
-    if (this.modelForm.invalid) return;
+  if (this.modelForm.invalid) return;
 
-    this.isLoading = true;
-    this.errorMessage = '';
+  this.isLoading = true;
+  this.errorMessage = '';
 
-    const payload = {
-      ...this.modelForm.value,
-      questions: this.modelForm.value.questions.map((q: any, i: number) => ({
-        id: i + 1,
-        text: q.text,
-        answers: q.answers
+  const formValue = this.modelForm.value;
+
+  const payload = {
+    title: formValue.title,
+    description: formValue.description,
+    category: formValue.category,
+    icon: formValue.icon,
+    questions: formValue.questions.map((q: any, qIndex: number) => ({
+      text: q.text,
+      questionOrder: qIndex + 1, 
+      answers: q.answers.map((a: any, aIndex: number) => ({
+        value: a.value,
+        answerOrder: aIndex + 1 
       }))
-    };
+    }))
+  };
 
-    this.maturityModelService.updateModel(this.modelId, payload).pipe(takeUntil(this.destroy$)).subscribe({
+  console.log('Payload envoyé :', JSON.stringify(payload, null, 2)); // debug
+
+  this.maturityModelService.updateModel(this.modelId, payload)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
       next: () => {
         this.isLoading = false;
         this.router.navigate(['/pmo/dashboard']);
@@ -187,7 +195,7 @@ export class EditModelComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Une erreur est survenue lors de la modification';
       }
     });
-  }
+}
 
   ngOnDestroy(): void {
     this.destroy$.next();

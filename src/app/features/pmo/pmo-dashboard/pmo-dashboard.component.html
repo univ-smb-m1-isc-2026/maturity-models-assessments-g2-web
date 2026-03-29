@@ -49,7 +49,7 @@
     <section class="models-section">
       <h2 class="section-title">Mes modèles de maturité</h2>
 
-      <div class="empty-state" *ngIf="models.length == 0">
+      <div class="empty-state" *ngIf="models.length === 0">
         <p>🗂️ Aucun modèle créé pour l'instant</p>
         <button class="btn-primary" routerLink="/pmo/model/new">Créer mon premier modèle</button>
       </div>

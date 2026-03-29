@@ -50,7 +50,6 @@ export class FormModelComponent implements OnInit, OnDestroy {
       questions: this.fb.array([ this.createQuestion() ])
     });
 
-    // Mettre à jour l’icône lors du choix de catégorie
     this.modelForm.get('category')?.valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe((value: MaturityCategory) => {
@@ -71,7 +70,7 @@ export class FormModelComponent implements OnInit, OnDestroy {
     this.maturityModelService.getModelById(this.modelId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (model: any) => {
+      next: model => {
         this.isFetching = false;
 
         this.modelForm.patchValue({
@@ -133,7 +132,8 @@ export class FormModelComponent implements OnInit, OnDestroy {
 
 
   // =========================
-  // LEVELS (dans chaque question)
+  // LEVELS (EQUIVALENT A ANSWERS) 
+  // TODO : MODIFIER LEVEL EN ANSWERS POUR COHERENCE
   // =========================
   getLevels(questionIndex: number): FormArray {
     return this.questions.at(questionIndex).get('levels') as FormArray;

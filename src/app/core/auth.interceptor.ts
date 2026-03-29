@@ -29,8 +29,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = authService.getToken();
 
-  console.log('AuthInterceptor: token récupéré', token);
-
   // Clone la requête et ajoute le header Authorization si token présent
   const authReq = token
     ? req.clone({

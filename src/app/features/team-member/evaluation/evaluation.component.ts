@@ -55,7 +55,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
           if (model) {
             model.questions = model.questions
               .slice()
-              .sort((a, b) => a.order - b.order);
+              .sort((a, b) => a.questionOrder - b.questionOrder);
           }
           this.model = model ?? null;
           this.isFetching = false;

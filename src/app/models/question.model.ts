@@ -1,6 +1,8 @@
+import { Answer } from "./evaluation.model";
+
 export interface Question {
   id:    number;
   text:  string;
-  order: number;
-  levels: string[];  
+  questionOrder: number;
+  answers : Answer[];
 }

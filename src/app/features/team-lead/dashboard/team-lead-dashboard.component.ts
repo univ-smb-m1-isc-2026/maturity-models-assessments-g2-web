@@ -9,6 +9,7 @@ import { MaturityModelService } from '@core/maturity-model.service';
 import { SessionService } from '@core/session.service';
 import { MaturityModel } from '@models/maturity-model.model';
 import { User } from '@models/user.model';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-team-lead-dashboard',
@@ -28,6 +29,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   sessionError: string = '';
   isInviting: boolean = false;
   isSession: boolean = false;
+  isLoading: boolean = true; 
   showInviteModal: boolean = false;
   showSessionModal: boolean = false;
 
@@ -60,7 +62,8 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     private maturityModelService: MaturityModelService,
     private sessionService : SessionService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router, 
+    private cdr: ChangeDetectorRef, 
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
@@ -74,11 +77,28 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       modelId: ['', Validators.required]
     });
 
+    this.loadModels()
+   
+  }
+
+   private loadModels() {
+    this.isLoading = true; 
     this.maturityModelService.getModels().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (models) => this.models = models,
-      error: () => console.error('Erreur chargement des modèles')
+      takeUntil(this.destroy$)).subscribe({
+       next: (models) => {
+        console.log('Modèles récupérés :', models);
+        this.models = models;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        console.log('isLoading après chargement :', this.isLoading);
+      },
+      error: (err) => {
+        console.error('Erreur chargement des modèles :', err);
+        console.error('Status :', err.status);
+        console.error('Body :', err.error);
+        this.isLoading = false; 
+      }, 
+     
     });
   }
 
