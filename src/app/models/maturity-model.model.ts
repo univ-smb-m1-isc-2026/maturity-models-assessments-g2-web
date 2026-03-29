@@ -15,7 +15,6 @@ export interface MaturityModel {
   category:    MaturityCategory;  // ✅ Catégorie du modèle
   icon:        string;            // ✅ Emoji représentant la catégorie
   questions:   Question[];        // ✅ Questions associées au modèle
-  createdBy:   number;            // id d'un user PMO/admin
   createdAt:   Date;
 }
 

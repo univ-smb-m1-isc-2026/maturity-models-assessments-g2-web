@@ -174,29 +174,37 @@ export class FormModelComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const payload = {
-      ...this.modelForm.value,
-      questions: this.modelForm.value.questions.map((q: any, i: number) => ({
-        id: i + 1,
-        text: q.text,
-        levels: q.levels
+   const payload = {
+    title:       this.modelForm.value.title,
+    description: this.modelForm.value.description,
+    category:    this.modelForm.value.category,
+    icon:        this.modelForm.value.icon,
+    questions:   this.modelForm.value.questions.map((q: any, qIndex: number) => ({
+      text:          q.text,
+      questionOrder: qIndex + 1,
+      answers:       q.levels.map((level: string, aIndex: number) => ({
+        value:       level,
+        answerOrder: aIndex + 1
       }))
-    };
+    }))
+  };
 
-    const request$ = this.isEditMode
-      ? this.maturityModelService.updateModel(this.modelId, payload)
-      : this.maturityModelService.createModel(payload);
-    console.log('Request retourned:', request$);
-    request$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/pmo/dashboard']);
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Une erreur est survenue lors de l’enregistrement';
-      }
-    });
+    const request$ = this.maturityModelService.createModel(payload);
+request$.pipe(takeUntil(this.destroy$)).subscribe({
+  next: (response) => {
+    console.log('✅ Modèle enregistré avec succès :', response);
+    this.isLoading = false;
+    this.router.navigate(['/pmo/dashboard']);
+  },
+  error: (err) => {
+    console.error('❌ Erreur lors de l\'enregistrement :', err);
+    console.error('Status :', err.status);
+    console.error('Message :', err.message);
+    console.error('Body :', err.error);
+    this.isLoading = false;
+    this.errorMessage = 'Une erreur est survenue lors de l\'enregistrement';
+  }
+});
   }
 
   ngOnDestroy(): void {
