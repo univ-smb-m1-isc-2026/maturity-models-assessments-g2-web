@@ -75,7 +75,7 @@ export class EditModelComponent implements OnInit, OnDestroy {
           });
           this.questions.clear();
           if (model.questions?.length) {
-            model.questions.forEach((q: any) => this.questions.push(this.createQuestion(q)));
+            model.questions.forEach((q: Question) => this.questions.push(this.createQuestion(q)));
           } else {
             this.questions.push(this.createQuestion());
           }
@@ -96,12 +96,12 @@ export class EditModelComponent implements OnInit, OnDestroy {
     return this.modelForm.get('questions') as FormArray;
   }
 
-  createQuestion(question?: any): FormGroup {
+  createQuestion(question?: Question): FormGroup {
   return this.fb.group({
     text: [question?.text || '', Validators.required],
     answers: this.fb.array(
       question?.answers?.length
-        ? question.answers.map((ans: any) => this.createAnswer(ans))
+        ? question.answers.map((ans: Answer) => this.createAnswer(ans))
         : [this.createAnswer()]
     )
   });
@@ -171,10 +171,10 @@ export class EditModelComponent implements OnInit, OnDestroy {
     description: formValue.description,
     category: formValue.category,
     icon: formValue.icon,
-    questions: formValue.questions.map((q: any, qIndex: number) => ({
+    questions: formValue.questions.map((q: Question, qIndex: number) => ({
       text: q.text,
       questionOrder: qIndex + 1, 
-      answers: q.answers.map((a: any, aIndex: number) => ({
+      answers: q.answers.map((a: Answer, aIndex: number) => ({
         value: a.value,
         answerOrder: aIndex + 1 
       }))

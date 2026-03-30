@@ -1,4 +1,4 @@
-import { Answer } from "./evaluation.model";
+import { Answer } from "./answer.model";
 
 export interface Question {
   id:    number;

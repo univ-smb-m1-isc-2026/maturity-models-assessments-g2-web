@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 import { MaturityModelService } from '@core/maturity-model.service';
 import { AuthService } from '@core/auth.service';
 import { MATURITY_CATEGORIES, MaturityCategory } from '@models/maturity-model.model';
+import { Question } from '@models/question.model';
 
 @Component({
   selector: 'app-form-model',
@@ -83,7 +84,7 @@ export class FormModelComponent implements OnInit, OnDestroy {
         // Questions + niveaux
         this.questions.clear();
         if (model.questions?.length) {
-          model.questions.forEach((q: any) => this.questions.push(this.createQuestion(q)));
+          model.questions.forEach((q: Question) => this.questions.push(this.createQuestion(q)));
         } else {
           this.questions.push(this.createQuestion());
         }
