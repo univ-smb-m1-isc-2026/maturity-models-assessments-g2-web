@@ -1,14 +1,14 @@
-export interface Answer {
+export interface UserAnswer {
   questionId: number;
-  value:      number;  // ✅ Note de 1 à 5
+  value:      string;  
 }
 
 export interface Evaluation {
   id:          number;
-  sessionId:   string;   // ✅ string pour matcher SessionResult
+  sessionId:   number;   
   modelId:     number;
   teamId:      number;
   userId:      number;
-  answers:     Answer[];
+  answers:     UserAnswer[];
   completedAt: Date;
 }
