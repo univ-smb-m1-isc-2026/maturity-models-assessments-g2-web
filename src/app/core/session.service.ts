@@ -1,93 +1,51 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Session } from '@models/session.model';
 import { SessionStatus } from '@models/status.enum';
+import { environment } from '../../environments/environment';;
+
+
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
 
-  private mockSessions: Session[] = [
-    {
-      id: 1,
-      modelId: 1,
-      teamId: 1,
-      name: 'Évaluation Scrum Q1 2025',
-      status: SessionStatus.ACTIVE,
-      deadline: new Date('2025-03-31'),
-      createdAt: new Date('2025-01-15')
-    },
-    {
-      id: 2,
-      modelId: 2,
-      teamId: 2,
-      name: 'Audit Cybersécurité NIST',
-      status: SessionStatus.ACTIVE,
-      deadline: new Date('2025-02-28'),
-      createdAt: new Date('2025-01-10')
-    },
-    {
-      id: 3,
-      modelId: 3,
-      teamId: 2,
-      name: 'Évaluation DevOps T2',
-      status: SessionStatus.CLOSED,
-      deadline: new Date('2025-06-30'),
-      createdAt: new Date('2025-03-01')
-    },
-    {
-      id: 4,
-      modelId: 1,
-      teamId: 2,
-      name: 'Scrum Avancé - Équipe B',
-      status: SessionStatus.DRAFT,
-      deadline: new Date('2025-04-15'),
-      createdAt: new Date('2025-02-20')
-    }
-  ];
+  private readonly baseUrl = `${environment.apiUrl}/api/sessions`;
 
-  getSessionById(id: number): Observable<Session | undefined> {
-    // 🔌 API : return this.http.get<Session>(`/api/sessions/${id}`);
-    const session = this.mockSessions.find(s => s.id === id);
-    return of(session);
+  constructor(private http: HttpClient) {}
+  getSessionById(id: number): Observable<Session> {
+    return this.http.get<Session>(`${this.baseUrl}/${id}`);
   }
 
-  getSessionsByTeam(idTeam: number): Observable<Session[]> {
-    // 🔌 API : return this.http.get<Session[]>(`/api/sessions?teamId=${idTeam}`);
-    const sessions = this.mockSessions.filter(s => s.teamId === idTeam);
-    return of(sessions);
+  getSessionsByTeam(teamId: number): Observable<Session[]> {
+    return this.http.get<Session[]>(`${this.baseUrl}/by-team/${teamId}`);
   }
 
-  getActiveSessionsByTeam(idTeam: number): Observable<Session[]> {
-    // 🔌 API : return this.http.get<Session[]>(`/api/sessions?teamId=${idTeam}&status=ACTIVE`);
-    const sessions = this.mockSessions.filter(
-      s => s.teamId === idTeam && s.status === SessionStatus.ACTIVE
-    );
-    return of(sessions);
+  getActiveSessionsByTeam(teamId: number): Observable<Session[]> {
+    return new Observable(observer => {
+      this.getSessionsByTeam(teamId).subscribe({
+        next: sessions => {
+          observer.next(sessions.filter(s => s.status === SessionStatus.ACTIVE));
+          observer.complete();
+        },
+        error: err => observer.error(err)
+      });
+    });
+  }
+
+  getSessionsByModel(modelId: number): Observable<Session[]> {
+    return this.http.get<Session[]>(`${this.baseUrl}/by-model/${modelId}`);
+  }
+
+  getSessions(): Observable<Session[]> {
+    return this.http.get<Session[]>(this.baseUrl);
   }
 
   createSession(session: Omit<Session, 'id' | 'createdAt'>): Observable<Session> {
-    // 🔌 API : return this.http.post<Session>('/api/sessions', session);
-    const newSession: Session = {
-      ...session,
-      id: Date.now(),
-      createdAt: new Date()
-    };
-    this.mockSessions.push(newSession);
-    return of(newSession);
-  }
-
-  updateSession(id: number, changes: Partial<Session>): Observable<Session | undefined> {
-    // 🔌 API : return this.http.patch<Session>(`/api/sessions/${id}`, changes);
-    const index = this.mockSessions.findIndex(s => s.id === id);
-    if (index === -1) return of(undefined);
-
-    this.mockSessions[index] = { ...this.mockSessions[index], ...changes };
-    return of(this.mockSessions[index]);
+    return this.http.post<Session>(this.baseUrl, session);
   }
 
   deleteSession(id: number): Observable<void> {
-    // 🔌 API : return this.http.delete<void>(`/api/sessions/${id}`);
-    this.mockSessions = this.mockSessions.filter(s => s.id !== id);
-    return of(void 0);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

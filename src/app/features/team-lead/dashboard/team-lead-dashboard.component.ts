@@ -12,8 +12,9 @@ import { User } from '@models/user.model';
 import { TeamService } from '@core/team.service';
 import { Team } from '@models/team.model';
 import { UserService } from '@core/user.service';
+import { Session } from '@models/session.model';
+import { SessionStatus } from '@models/status.enum';
 
-// Structure enrichie d'une équipe avec les données complètes des membres
 export interface TeamWithMembers extends Team {
   members: User[];
   pendingCount: number;
@@ -31,8 +32,9 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   models: MaturityModel[] = [];
   teams: Team[] = [];
-  teamsWithMembers: TeamWithMembers[] = [];   // Équipes enrichies pour l'affichage
-  teamMembers: User[] = [];                   // Tous les membres (toutes équipes confondues)
+  teamsWithMembers: TeamWithMembers[] = [];
+  teamMembers: User[] = [];
+  sessions: Session[] = [];
 
   inviteForm!: FormGroup;
   sessionForm!: FormGroup;
@@ -54,12 +56,10 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   showSessionModal: boolean = false;
   showCreateTeamModal: boolean = false;
 
-  // Compteurs globaux (toutes équipes confondues)
   totalMembersCount: number = 0;
   pendingMembersCount: number = 0;
   activeMembersCount: number = 0;
 
-  // Équipe sélectionnée pour afficher le détail de ses membres
   selectedTeam: TeamWithMembers | null = null;
 
   private destroy$ = new Subject<void>();
@@ -80,12 +80,14 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.inviteForm = this.fb.group({
       teamId: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]]
+      email:  ['', [Validators.required, Validators.email]]
     });
 
     this.sessionForm = this.fb.group({
-      teamId: ['', Validators.required],
-      modelId: ['', Validators.required]
+      teamId:   ['', Validators.required],
+      modelId:  ['', Validators.required],
+      name:     ['', [Validators.required, Validators.minLength(3)]],
+      deadline: [null]
     });
 
     this.createTeamForm = this.fb.group({
@@ -94,6 +96,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
 
     this.loadModels();
     this.loadTeamsAndMembers();
+    this.loadSessions();
   }
 
   private loadModels(): void {
@@ -121,7 +124,6 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
           this.sessionForm.patchValue({ teamId: teams[0].id });
         }
 
-        // Collecte tous les ids uniques de membres sur toutes les équipes
         const memberIds = [...new Set(teams.flatMap(team => team.memberIds || []))];
 
         if (memberIds.length === 0) {
@@ -148,24 +150,21 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       next: ({ teams, users }) => {
         this.teamMembers = users;
 
-        // Construit chaque TeamWithMembers en croisant les ids avec les users chargés
         this.teamsWithMembers = teams.map(team => {
           const members = (team.memberIds || [])
             .map(id => users.find(u => u.id === id))
             .filter((u): u is User => u !== undefined);
 
           const pendingCount = members.filter(u => u.status === 'En attente').length;
-          const activeCount = members.filter(u => u.status !== 'En attente').length;
+          const activeCount  = members.filter(u => u.status !== 'En attente').length;
 
           return { ...team, members, pendingCount, activeCount };
         });
 
-        // Compteurs globaux
-        this.totalMembersCount = users.length;
+        this.totalMembersCount   = users.length;
         this.pendingMembersCount = users.filter(u => u.status === 'En attente').length;
-        this.activeMembersCount = users.filter(u => u.status !== 'En attente').length;
+        this.activeMembersCount  = users.filter(u => u.status !== 'En attente').length;
 
-        // Sélectionne la première équipe par défaut si aucune n'est choisie
         if (!this.selectedTeam && this.teamsWithMembers.length > 0) {
           this.selectedTeam = this.teamsWithMembers[0];
         }
@@ -180,11 +179,76 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- Sélection d'équipe pour afficher ses membres ---
+  private loadSessions(): void {
+    this.sessionService.getSessions().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (sessions) => {
+        this.sessions = sessions;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur chargement des sessions :', err)
+    });
+  }
+
+  // --- Helpers template ---
+
+  getTeamName(teamId: number): string {
+    return this.teams.find(t => t.id === teamId)?.name ?? '—';
+  }
+
+  getModelName(modelId: number): string {
+    return this.models.find(m => m.id === modelId)?.title ?? '—';
+  }
+
+  getStatusLabel(status: SessionStatus): string {
+    const labels: Record<SessionStatus, string> = {
+      [SessionStatus.ACTIVE]:  'Active',
+      [SessionStatus.CLOSED]:  'Terminée',
+      [SessionStatus.DRAFT]:   'Brouillon',
+    };
+    return labels[status] ?? status;
+  }
+
+  getStatusClass(status: SessionStatus): string {
+    const classes: Record<SessionStatus, string> = {
+      [SessionStatus.ACTIVE]:  'active',
+      [SessionStatus.CLOSED]:  'closed',
+      [SessionStatus.DRAFT]:   'draft',
+    };
+    return classes[status] ?? '';
+  }
+
+  isDeadlineSoon(deadline?: Date): boolean {
+    if (!deadline) return false;
+    const diff = deadline.getTime() - Date.now();
+    return diff > 0 && diff < 7 * 24 * 60 * 60 * 1000; // moins de 7 jours
+  }
+
+  isDeadlinePassed(deadline?: Date): boolean {
+    if (!deadline) return false;
+    return deadline.getTime() < Date.now();
+  }
 
   selectTeam(team: TeamWithMembers): void {
     this.selectedTeam = team;
   }
+
+  deleteTeam(id: number): void {
+  this.teamService.deleteTeam(id).pipe(
+    takeUntil(this.destroy$)
+  ).subscribe({
+    next: () => {
+      this.teams = this.teams.filter(t => t.id !== id);
+      this.teamsWithMembers = this.teamsWithMembers.filter(t => t.id !== id);
+      if (this.selectedTeam?.id === id) {
+        this.selectedTeam = this.teamsWithMembers[0] ?? null;
+      }
+      this.cdr.detectChanges();
+    },
+    error: (err) => console.error('Erreur suppression équipe :', err)
+  });
+}
 
   // --- Modals invite ---
 
@@ -231,6 +295,12 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
 
   openSessionModal(): void {
     this.showSessionModal = true;
+    this.sessionForm.reset();
+    this.sessionSuccess = '';
+    this.sessionError = '';
+    if (this.teams.length > 0) {
+      this.sessionForm.patchValue({ teamId: this.teams[0].id });
+    }
   }
 
   closeSessionModal(): void {
@@ -247,19 +317,42 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     this.sessionSuccess = '';
     this.sessionError = '';
 
-    const { modelId, teamId } = this.sessionForm.value;
+    const { teamId, modelId, name, deadline } = this.sessionForm.value;
 
-    this.sessionService.createSession(modelId).pipe(
+    const session: Omit<Session, 'id' | 'createdAt'> = {
+      teamId:   +teamId,
+      modelId:  +modelId,
+      name,
+      status:   SessionStatus.DRAFT,
+      deadline: deadline ? new Date(deadline) : undefined
+    };
+
+    this.sessionService.createSession(session).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: () => {
+      next: (created) => {
         this.isSession = false;
         this.sessionSuccess = 'Session créée avec succès';
+        this.sessions = [...this.sessions, created];
+        this.sessionForm.reset();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isSession = false;
         this.sessionError = 'Erreur lors de la création de la session';
       }
+    });
+  }
+
+  deleteSession(id: number): void {
+    this.sessionService.deleteSession(id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.sessions = this.sessions.filter(s => s.id !== id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erreur suppression session :', err)
     });
   }
 
@@ -284,18 +377,16 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     this.createTeamError = '';
 
     const name = this.createTeamForm.value;
-    
+
     this.teamService.createTeam(name).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
-        console.log();
         this.isCreatingTeam = false;
         this.createTeamSuccess = `Équipe "${name.name}" créée avec succès`;
-        this.cdr.detectChanges()
+        this.cdr.detectChanges();
       },
       error: () => {
-        console.log();
         this.isCreatingTeam = false;
         this.createTeamError = "Erreur lors de la création de l'équipe";
       }

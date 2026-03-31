@@ -79,12 +79,74 @@
           <p class="stat-label">Modèles disponibles</p>
         </div>
       </div>
+
+      <div class="stat-card">
+        <span class="stat-icon">🚀</span>
+        <div>
+          <p class="stat-value">{{ sessions.length }}</p>
+          <p class="stat-label">Sessions</p>
+        </div>
+      </div>
     </div>
 
     <!-- Chargement -->
     <div class="empty-state" *ngIf="isLoading">
       <p>Chargement des données...</p>
     </div>
+
+    <!-- Sessions en cours -->
+    <section class="section" *ngIf="!isLoading">
+      <h2 class="section-title">🚀 Sessions en cours</h2>
+
+      <div class="empty-state" *ngIf="sessions.length === 0">
+        <p>Aucune session pour l'instant.</p>
+        <button class="btn-primary" type="button" (click)="openSessionModal()">🚀 Commencer une session</button>
+      </div>
+
+      <div class="table-wrapper" *ngIf="sessions.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Équipe</th>
+              <th>Modèle</th>
+              <th>Statut</th>
+              <th>Deadline</th>
+              <th>Créée le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let session of sessions">
+              <td>{{ session.name }}</td>
+              <td>{{ getTeamName(session.teamId) }}</td>
+              <td>{{ getModelName(session.modelId) }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(session.status)">
+                  {{ getStatusLabel(session.status) }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="session.deadline"
+                      [class.text-warning]="isDeadlineSoon(session.deadline)"
+                      [class.text-danger]="isDeadlinePassed(session.deadline)">
+                  {{ session.deadline | date:'dd/MM/yyyy' }}
+                  <span *ngIf="isDeadlinePassed(session.deadline)"> ⚠️</span>
+                  <span *ngIf="isDeadlineSoon(session.deadline) && !isDeadlinePassed(session.deadline)"> 🔔</span>
+                </span>
+                <span *ngIf="!session.deadline" style="opacity: 0.4;">—</span>
+              </td>
+              <td>{{ session.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn-danger-sm" type="button" (click)="deleteSession(session.id)">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- Équipes + membres -->
     <section class="section" *ngIf="!isLoading">
@@ -98,26 +160,35 @@
       <div class="teams-layout" *ngIf="teamsWithMembers.length > 0">
 
         <!-- Liste des équipes (colonne gauche) -->
-        <div class="teams-list">
-          <div
-            class="team-item"
-            *ngFor="let team of teamsWithMembers"
-            [class.selected]="selectedTeam?.id === team.id"
-            (click)="selectTeam(team)">
-            <div class="team-item-header">
-              <span class="team-name">{{ team.name }}</span>
-              <span class="team-count">{{ team.members.length }} membre(s)</span>
-            </div>
-            <div class="team-item-badges">
-              <span class="status-badge active" *ngIf="team.activeCount > 0">
-                ✅ {{ team.activeCount }} actif(s)
-              </span>
-              <span class="status-badge pending" *ngIf="team.pendingCount > 0">
-                ⏳ {{ team.pendingCount }} en attente
-              </span>
-            </div>
-          </div>
-        </div>
+<div class="teams-list">
+  <div
+    class="team-item"
+    *ngFor="let team of teamsWithMembers"
+    [class.selected]="selectedTeam?.id === team.id"
+    (click)="selectTeam(team)">
+    <div class="team-item-header">
+      <span class="team-name">{{ team.name }}</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="team-count">{{ team.members.length }} membre(s)</span>
+        <button
+          class="btn-danger-sm"
+          type="button"
+          (click)="$event.stopPropagation(); deleteTeam(team.id)"
+          title="Supprimer l'équipe">
+          🗑️
+        </button>
+      </div>
+    </div>
+    <div class="team-item-badges">
+      <span class="status-badge active" *ngIf="team.activeCount > 0">
+        ✅ {{ team.activeCount }} actif(s)
+      </span>
+      <span class="status-badge pending" *ngIf="team.pendingCount > 0">
+        ⏳ {{ team.pendingCount }} en attente
+      </span>
+    </div>
+  </div>
+</div>
 
         <!-- Détail des membres de l'équipe sélectionnée (colonne droite) -->
         <div class="team-detail" *ngIf="selectedTeam">
@@ -257,51 +328,6 @@
         <button type="button" class="btn-secondary" (click)="closeInviteModal()">Annuler</button>
         <button type="submit" class="btn-primary" [disabled]="inviteForm.invalid || isInviting">
           {{ isInviting ? 'Envoi...' : "Envoyer l'invitation" }}
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal session -->
-<div class="modal-overlay" *ngIf="showSessionModal" (click)="closeSessionModal()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">🚀 Démarrer une session</h3>
-    <p class="modal-subtitle">Choisissez l'équipe et le modèle à évaluer</p>
-
-    <form [formGroup]="sessionForm" (ngSubmit)="startSession()" class="invite-form">
-
-      <div class="form-group">
-        <label>Équipe</label>
-        <select formControlName="teamId">
-          <option value="" disabled>Sélectionner une équipe</option>
-          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
-        </select>
-        <p class="error-msg"
-           *ngIf="sessionForm.get('teamId')?.invalid && sessionForm.get('teamId')?.touched">
-          Veuillez sélectionner une équipe
-        </p>
-      </div>
-
-      <div class="form-group">
-        <label>Modèle de maturité</label>
-        <select formControlName="modelId">
-          <option value="" disabled>Sélectionner un modèle</option>
-          <option *ngFor="let model of models" [value]="model.id">{{ model.title }}</option>
-        </select>
-        <p class="error-msg"
-           *ngIf="sessionForm.get('modelId')?.invalid && sessionForm.get('modelId')?.touched">
-          Veuillez sélectionner un modèle
-        </p>
-      </div>
-
-      <p class="success-msg" *ngIf="sessionSuccess">✅ {{ sessionSuccess }}</p>
-      <p class="error-msg" *ngIf="sessionError">{{ sessionError }}</p>
-
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary" (click)="closeSessionModal()">Annuler</button>
-        <button type="submit" class="btn-primary" [disabled]="sessionForm.invalid || isSession">
-          {{ isSession ? 'Confirmation...' : 'Démarrer la session' }}
         </button>
       </div>
     </form>
