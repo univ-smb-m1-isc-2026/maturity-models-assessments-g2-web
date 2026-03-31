@@ -12,7 +12,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: Role;
-  teamId?: number; // à voir gestion des id user dans team.model 
+  teamId?: number; 
   status : Status
   createdAt?: Date;
 }

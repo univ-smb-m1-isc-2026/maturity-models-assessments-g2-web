@@ -22,6 +22,7 @@ $font-body:    'Sora', system-ui, sans-serif;
   min-height: 100vh;
   background-color: $bg;
 
+  // ─── Sidebar ───────────────────────────────────────────────
   .sidebar {
     width: 240px;
     min-height: 100vh;
@@ -60,6 +61,8 @@ $font-body:    'Sora', system-ui, sans-serif;
         transition: all 0.2s;
         background: transparent;
         border: none;
+        width: 100%;
+        text-align: left;
 
         &:hover, &.active {
           background: rgba(99, 102, 241, 0.2);
@@ -89,28 +92,43 @@ $font-body:    'Sora', system-ui, sans-serif;
     }
   }
 
+  // ─── Main ──────────────────────────────────────────────────
   .main-content {
     margin-left: 240px;
     flex: 1;
     padding: 2rem;
 
+    // Header
     .main-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
 
       .main-title {
         font-size: 1.75rem;
         font-weight: 800;
         color: $text;
       }
-      .main-subtitle { color: $text-light; margin-top: 0.25rem; }
+
+      .main-subtitle {
+        color: $text-light;
+        margin-top: 0.25rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
     }
 
+    // ─── Stats ───────────────────────────────────────────────
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
 
@@ -122,13 +140,20 @@ $font-body:    'Sora', system-ui, sans-serif;
         background: #fff;
         border-radius: 1rem;
         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
 
-        .stat-icon { font-size: 2rem; }
-        .stat-value { font-size: 1.5rem; font-weight: 800; color: $text; }
-        .stat-label { font-size: 0.8rem; color: $text-light; }
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(99, 102, 241, 0.13);
+        }
+
+        .stat-icon  { font-size: 2rem; flex-shrink: 0; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: $text; line-height: 1; }
+        .stat-label { font-size: 0.78rem; color: $text-light; margin-top: 0.2rem; }
       }
     }
 
+    // ─── Section ─────────────────────────────────────────────
     .section {
       margin-bottom: 2rem;
 
@@ -140,6 +165,116 @@ $font-body:    'Sora', system-ui, sans-serif;
       }
     }
 
+    // ─── Layout équipes (liste + détail) ─────────────────────
+    .teams-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+
+      // Colonne gauche : liste des équipes
+      .teams-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+
+        .team-item {
+          background: #fff;
+          border: 2px solid transparent;
+          border-radius: 1rem;
+          padding: 1rem 1.25rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06);
+
+          &:hover {
+            border-color: rgba($primary, 0.3);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
+          }
+
+          &.selected {
+            border-color: $primary;
+            background: #f5f3ff;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
+          }
+
+          .team-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+
+            .team-name {
+              font-weight: 700;
+              font-size: 0.95rem;
+              color: $text;
+            }
+
+            .team-count {
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: $text-light;
+              background: $bg;
+              padding: 0.15rem 0.5rem;
+              border-radius: 999px;
+            }
+          }
+
+          .team-item-badges {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+          }
+        }
+      }
+
+      // Colonne droite : détail membres
+      .team-detail {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+        overflow: hidden;
+
+        .team-detail-header {
+          padding: 1.25rem 1.5rem;
+          border-bottom: 1px solid $border;
+          background: #f9f8ff;
+
+          h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: $text;
+            margin-bottom: 0.5rem;
+          }
+
+          .team-detail-meta {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+
+            span {
+              font-size: 0.8rem;
+              font-weight: 600;
+              color: $text-light;
+            }
+          }
+        }
+
+        // Le table-wrapper est imbriqué ici, on retire sa box-shadow propre
+        .table-wrapper {
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        // Empty state dans le détail
+        .empty-state {
+          border-radius: 0;
+          box-shadow: none;
+        }
+      }
+    }
+
+    // ─── Modèles ─────────────────────────────────────────────
     .models-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -165,6 +300,7 @@ $font-body:    'Sora', system-ui, sans-serif;
           margin-bottom: 0.75rem;
 
           .model-icon { font-size: 1.75rem; }
+
           .model-tag {
             font-size: 0.75rem;
             font-weight: 600;
@@ -175,40 +311,31 @@ $font-body:    'Sora', system-ui, sans-serif;
           }
         }
 
-        .model-name { font-size: 1rem; font-weight: 700; color: $text; margin-bottom: 0.4rem; }
-        .model-desc { font-size: 0.85rem; color: $text-light; margin-bottom: 0.75rem; line-height: 1.5; }
-
-        .model-subtitle{
-            font-size: 0.90rem;
-            font-weight: 600;
-            color: $text;
-            margin-bottom: 0.4rem;
-          }
-
-        .model-levels {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.35rem;
-          margin-bottom: 0.75rem;
+        .model-name    { font-size: 1rem; font-weight: 700; color: $text; margin-bottom: 0.4rem; }
+        .model-desc    { font-size: 0.85rem; color: $text-light; margin-bottom: 0.75rem; line-height: 1.5; }
+        .model-subtitle {
+          font-size: 0.90rem;
+          font-weight: 600;
+          color: $text;
+          margin-bottom: 0.4rem;
         }
 
-        .model-meta {
-          font-size: 0.8rem;
-          color: $text-light;
-          margin-bottom: 1rem;
+        .model-meta    { font-size: 0.8rem; color: $text-light; margin-bottom: 1rem; }
+
+        .questions-list {
+          padding-left: 1.1rem;
+          margin: 0;
+
+          li {
+            font-size: 0.82rem;
+            color: $text-light;
+            line-height: 1.6;
+          }
         }
       }
     }
 
-    .level-badge {
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      background: #e0e7ff;
-      color: $primary-dark;
-      border-radius: 999px;
-    }
-
+    // ─── Table ───────────────────────────────────────────────
     .table-wrapper {
       background: #fff;
       border-radius: 1rem;
@@ -237,10 +364,18 @@ $font-body:    'Sora', system-ui, sans-serif;
         }
 
         tr:last-child td { border-bottom: none; }
+
+        tbody tr {
+          transition: background 0.15s;
+          &:hover { background: #faf9ff; }
+        }
       }
     }
 
+    // ─── Badges & états ──────────────────────────────────────
     .status-badge {
+      display: inline-flex;
+      align-items: center;
       font-size: 0.75rem;
       font-weight: 600;
       padding: 0.25rem 0.75rem;
@@ -248,6 +383,15 @@ $font-body:    'Sora', system-ui, sans-serif;
 
       &.active  { background: #dcfce7; color: #16a34a; }
       &.pending { background: #fef9c3; color: #ca8a04; }
+    }
+
+    .level-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      background: #e0e7ff;
+      color: $primary-dark;
+      border-radius: 999px;
     }
 
     .empty-state {
@@ -259,11 +403,14 @@ $font-body:    'Sora', system-ui, sans-serif;
       background: #fff;
       border-radius: 1rem;
       color: $text-light;
+      font-size: 0.9rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
     }
   }
 }
 
-// Modal
+// ─── Modals ────────────────────────────────────────────────────
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -298,16 +445,20 @@ $font-body:    'Sora', system-ui, sans-serif;
 
         label { font-size: 0.85rem; font-weight: 600; color: $text; }
 
-        input {
+        input, select {
           padding: 0.7rem 1rem;
           border: 1.5px solid $border;
           border-radius: 0.75rem;
           font-size: 0.95rem;
+          background: #fff;
+          color: $text;
+          appearance: none;
+          -webkit-appearance: none;
 
           &:focus {
             outline: none;
             border-color: $primary;
-            box-shadow: 0 0 0 4px rgba($primary, 0.2);
+            box-shadow: 0 0 0 4px rgba($primary, 0.15);
           }
         }
       }
@@ -323,9 +474,11 @@ $font-body:    'Sora', system-ui, sans-serif;
   }
 }
 
+// ─── Messages ──────────────────────────────────────────────────
 .success-msg { font-size: 0.85rem; color: #16a34a; }
 .error-msg   { font-size: 0.8rem;  color: #f43f5e; &::before { content: '⚠ '; } }
 
+// ─── Boutons globaux ───────────────────────────────────────────
 .btn-primary {
   padding: 0.65rem 1.25rem;
   background: linear-gradient(135deg, $primary, $primary-dark);
@@ -338,8 +491,16 @@ $font-body:    'Sora', system-ui, sans-serif;
   box-shadow: 0 4px 14px rgba($primary, 0.35);
   transition: all 0.2s;
 
-  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba($primary, 0.45); }
-  &:disabled { background: linear-gradient(135deg, #c7d2fe, #a5b4fc); box-shadow: none; cursor: not-allowed; }
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba($primary, 0.45);
+  }
+
+  &:disabled {
+    background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
 }
 
 .btn-secondary {
@@ -354,6 +515,57 @@ $font-body:    'Sora', system-ui, sans-serif;
   transition: all 0.2s;
 
   &:hover { background: #e5e7eb; }
+}
+
+// ─── Responsive ────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .dashboard-wrapper {
+    .teams-layout {
+      grid-template-columns: 1fr !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+
+    .sidebar {
+      position: relative;
+      width: 100%;
+      min-height: unset;
+      padding: 1rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+
+      .sidebar-logo { margin-bottom: 0; flex: 1; }
+
+      .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex: unset;
+        width: 100%;
+      }
+
+      .logout-btn { margin-top: 0; }
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 1rem;
+
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  }
 }
 
 @keyframes fadeInUp {

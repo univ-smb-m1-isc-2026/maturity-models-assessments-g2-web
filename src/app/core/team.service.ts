@@ -1,68 +1,55 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Team } from '@models/team.model';
+import { environment } from 'src/environments/environment.development';
+
 
 @Injectable({ providedIn: 'root' })
 export class TeamService {
 
-  // 🔧 Mock — à remplacer par appels HTTP
-private mockTeam: Team[] = [
-  {
-    id: 1,
-    name: 'Équipe Alpha',
-    leadId: 1,
-    memberIds: [2, 3, 4],
-    createdAt: new Date('2024-09-01')
-  },
-  {
-    id: 2,
-    name: 'Équipe Beta',
-    leadId: 5,
-    memberIds: [6, 7, 8],
-    createdAt: new Date('2024-10-15')
-  },
-  {
-    id: 3,
-    name: 'Équipe Gamma',
-    leadId: 9,
-    memberIds: [10, 11, 12],
-    createdAt: new Date('2025-01-20')
-  }
-];
+  private readonly baseUrl = `${environment.apiUrl}/api/teams`;
 
-  // Récupère toutes les teams
+  constructor(private http: HttpClient) {}
+
+  // GET /api/teams — accessible à tous les utilisateurs authentifiés
   getTeams(): Observable<Team[]> {
-    return of(this.mockTeam);
-    // return this.http.get<Team[]>('/api/teams');
+    return this.http.get<Team[]>(this.baseUrl);
   }
 
+  // GET /api/teams/:id
   getTeamById(id: number): Observable<Team> {
-    return of(this.mockTeam.find(m => m.id === id)!);
+    return this.http.get<Team>(`${this.baseUrl}/${id}`);
   }
 
-  getTeamByUserid(id: number): Observable<Team | undefined> {
-    const team = this.mockTeam.find(m => m.memberIds.includes(id));
-    return of(team);
+  // GET /api/teams/my-teams — TEAM_LEAD uniquement
+  getMyTeams(): Observable<Team[]> {
+    return this.http.get<Team[]>(`${this.baseUrl}/my-teams`);
   }
 
-  createTeam(model: Omit<Team, 'id' | 'createdAt'>): Observable<Team> {
-    const newTeam: Team = {
-      ...model,
-      id:        Date.now(),
-      createdAt: new Date()
-    };
-    this.mockTeam.push(newTeam);
-    return of(newTeam);
+  // GET /api/teams/my-memberships — TEAM_MEMBER uniquement
+  getMyMemberships(): Observable<Team[]> {
+    return this.http.get<Team[]>(`${this.baseUrl}/my-memberships`);
   }
 
-  updateTeam(id: number, model: Partial<Team>): Observable<Team> {
-    const index = this.mockTeam.findIndex(m => m.id === id);
-    this.mockTeam[index] = { ...this.mockTeam[index], ...model };
-    return of(this.mockTeam[index]);
+    // POST /api/teams — TEAM_LEAD uniquement
+    createTeam(model: Pick<Team, 'name'>): Observable<Team> {
+      console.log(model)
+      return this.http.post<Team>(this.baseUrl, model);
+    }
+
+  // PUT /api/teams/:id — TEAM_LEAD uniquement (lead de l'équipe)
+  updateTeam(id: number, model: Pick<Team, 'name'>): Observable<Team> {
+    return this.http.put<Team>(`${this.baseUrl}/${id}`, model);
   }
 
+  // DELETE /api/teams/:id — TEAM_LEAD uniquement (lead de l'équipe)
   deleteTeam(id: number): Observable<void> {
-    this.mockTeam = this.mockTeam.filter(m => m.id !== id);
-    return of(void 0);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  // POST /api/teams/:id/invitations — TEAM_LEAD uniquement
+  inviteMember(teamId: number, email: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${teamId}/invitations`, { email });
   }
 }

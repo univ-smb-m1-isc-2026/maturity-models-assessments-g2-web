@@ -22,6 +22,7 @@ export const routes: Routes = [
   { path: '',         component: HomeComponent },
   { path: 'login',    component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  {path: "register/{:token}", component: RegisterComponent},
   {
     path: 'member/dashboard',
     component: TeamMemberDashboardComponent,

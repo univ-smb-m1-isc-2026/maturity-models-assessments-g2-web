@@ -54,7 +54,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.authService.getInvitationEmail(this.invitationToken!).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
-        next: (email) => this.registerForm.patchValue({ email }),
+        next: (data:any) =>{
+            this.registerForm.patchValue({ email: data.email });
+        },
         error: () => this.errorMessage = 'Invitation invalide ou expirée'
       });
     }

@@ -7,14 +7,18 @@
       <a class="nav-item active" routerLink="/team-lead/dashboard">
         <span class="nav-icon">📊</span> Dashboard
       </a>
-      <button class="nav-item" (click)="openInviteModal()">   <!-- ✅ <a> → <button> car pas de routerLink -->
+      <button class="nav-item" type="button" (click)="openCreateTeamModal()">
+        <span class="nav-icon">➕</span> Créer une équipe
+      </button>
+      <button class="nav-item" type="button" (click)="openInviteModal()">
         <span class="nav-icon">✉️</span> Inviter un membre
       </button>
-      <button class="nav-item" (click)="openSessionModal()">  <!-- ✅ idem -->
+      <button class="nav-item" type="button" (click)="openSessionModal()">
         <span class="nav-icon">🚀</span> Commencer une session
       </button>
     </nav>
-    <button class="logout-btn" (click)="logout()">
+
+    <button class="logout-btn" type="button" (click)="logout()">
       <span>🚪</span> Déconnexion
     </button>
   </aside>
@@ -27,21 +31,47 @@
         <h1 class="main-title">Tableau de bord Team Lead</h1>
         <p class="main-subtitle">Bienvenue, {{ currentUser?.firstName }} 👋</p>
       </div>
-      <div class="header-actions">   <!-- ✅ Wrapper pour les deux boutons -->
-        <button class="btn-primary" (click)="openInviteModal()">✉️ Inviter un membre</button>
-        <button class="btn-primary" (click)="openSessionModal()">🚀 Commencer une session</button>
+      <div class="header-actions">
+        <button class="btn-secondary" type="button" (click)="openCreateTeamModal()">➕ Créer une équipe</button>
+        <button class="btn-primary" type="button" (click)="openInviteModal()">✉️ Inviter un membre</button>
+        <button class="btn-primary" type="button" (click)="openSessionModal()">🚀 Commencer une session</button>
       </div>
     </header>
 
-    <!-- Stats -->
+    <!-- Stats globales -->
     <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">🏷️</span>
+        <div>
+          <p class="stat-value">{{ teams.length }}</p>
+          <p class="stat-label">Équipes</p>
+        </div>
+      </div>
+
       <div class="stat-card">
         <span class="stat-icon">👥</span>
         <div>
-          <p class="stat-value">{{ teamMembers.length }}</p>
-          <p class="stat-label">Membres dans l'équipe</p>
+          <p class="stat-value">{{ totalMembersCount }}</p>
+          <p class="stat-label">Membres au total</p>
         </div>
       </div>
+
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <div>
+          <p class="stat-value">{{ activeMembersCount }}</p>
+          <p class="stat-label">Membres actifs</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon">⏳</span>
+        <div>
+          <p class="stat-value">{{ pendingMembersCount }}</p>
+          <p class="stat-label">Invitations en attente</p>
+        </div>
+      </div>
+
       <div class="stat-card">
         <span class="stat-icon">📋</span>
         <div>
@@ -49,47 +79,93 @@
           <p class="stat-label">Modèles disponibles</p>
         </div>
       </div>
-      <div class="stat-card">
-        <span class="stat-icon">⏳</span>
-        <div>
-          <!-- ✅ Calcul déplacé dans le TS via un getter -->
-          <p class="stat-value">{{ pendingMembersCount }}</p>
-          <p class="stat-label">Invitations en attente</p>
-        </div>
-      </div>
     </div>
 
-    <!-- Membres de l'équipe -->
-    <section class="section">
-      <h2 class="section-title">👥 Mon équipe</h2>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Email</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let member of teamMembers">
-              <td>{{ member.firstName }} {{ member.lastName }}</td>
-              <td>{{ member.email }}</td>
-              <td>
-                <span class="status-badge"
-                  [class.active]="member.status === 'Actif'"
-                  [class.pending]="member.status === 'En attente'">
-                  {{ member.status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Chargement -->
+    <div class="empty-state" *ngIf="isLoading">
+      <p>Chargement des données...</p>
+    </div>
+
+    <!-- Équipes + membres -->
+    <section class="section" *ngIf="!isLoading">
+      <h2 class="section-title">👥 Mes équipes</h2>
+
+      <div class="empty-state" *ngIf="teamsWithMembers.length === 0">
+        <p>Aucune équipe trouvée. Créez votre première équipe !</p>
+        <button class="btn-primary" type="button" (click)="openCreateTeamModal()">➕ Créer une équipe</button>
+      </div>
+
+      <div class="teams-layout" *ngIf="teamsWithMembers.length > 0">
+
+        <!-- Liste des équipes (colonne gauche) -->
+        <div class="teams-list">
+          <div
+            class="team-item"
+            *ngFor="let team of teamsWithMembers"
+            [class.selected]="selectedTeam?.id === team.id"
+            (click)="selectTeam(team)">
+            <div class="team-item-header">
+              <span class="team-name">{{ team.name }}</span>
+              <span class="team-count">{{ team.members.length }} membre(s)</span>
+            </div>
+            <div class="team-item-badges">
+              <span class="status-badge active" *ngIf="team.activeCount > 0">
+                ✅ {{ team.activeCount }} actif(s)
+              </span>
+              <span class="status-badge pending" *ngIf="team.pendingCount > 0">
+                ⏳ {{ team.pendingCount }} en attente
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Détail des membres de l'équipe sélectionnée (colonne droite) -->
+        <div class="team-detail" *ngIf="selectedTeam">
+          <div class="team-detail-header">
+            <h3>{{ selectedTeam.name }}</h3>
+            <div class="team-detail-meta">
+              <span>👥 {{ selectedTeam.members.length }} membre(s)</span>
+              <span>✅ {{ selectedTeam.activeCount }} actif(s)</span>
+              <span>⏳ {{ selectedTeam.pendingCount }} en attente</span>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="selectedTeam.members.length === 0">
+            <p>Aucun membre dans cette équipe.</p>
+            <button class="btn-primary" type="button" (click)="openInviteModal()">✉️ Inviter un membre</button>
+          </div>
+
+          <div class="table-wrapper" *ngIf="selectedTeam.members.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let member of selectedTeam.members">
+                  <td>{{ member.firstName }} {{ member.lastName }}</td>
+                  <td>{{ member.email }}</td>
+                  <td>
+                    <span class="status-badge"
+                          [class.active]="member.status === 'Actif'"
+                          [class.pending]="member.status === 'En attente'">
+                      {{ member.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- Modèles disponibles -->
-    <section class="section">
+    <section class="section" *ngIf="!isLoading">
       <h2 class="section-title">📋 Modèles de maturité disponibles</h2>
 
       <div class="empty-state" *ngIf="models.length === 0">
@@ -98,28 +174,52 @@
 
       <div class="models-grid" *ngIf="models.length > 0">
         <div class="model-card" *ngFor="let model of models">
-
           <div class="model-card-header">
             <span class="model-icon">{{ model.icon }}</span>
             <span class="model-tag">{{ model.category }}</span>
           </div>
-
           <h3 class="model-name">{{ model.title }}</h3>
           <p class="model-desc">{{ model.description ?? 'Aucune description' }}</p>
-
           <div class="model-meta">
             <p class="model-subtitle">Questions :</p>
-            <ul class="questions-list">   <!-- ✅ div + span → ul/li sémantique -->
+            <ul class="questions-list">
               <li *ngFor="let question of model.questions">{{ question.text }}</li>
             </ul>
-          </div> 
-
+          </div>
         </div>
-        
       </div>
     </section>
 
   </main>
+</div>
+
+<!-- Modal création d'équipe -->
+<div class="modal-overlay" *ngIf="showCreateTeamModal" (click)="closeCreateTeamModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">➕ Créer une équipe</h3>
+    <p class="modal-subtitle">Donnez un nom à votre nouvelle équipe</p>
+
+    <form [formGroup]="createTeamForm" (ngSubmit)="createTeam()" class="invite-form">
+      <div class="form-group">
+        <label>Nom de l'équipe</label>
+        <input type="text" formControlName="name" placeholder="Ex: Équipe Backend" />
+        <p class="error-msg"
+           *ngIf="createTeamForm.get('name')?.invalid && createTeamForm.get('name')?.touched">
+          Le nom doit contenir au moins 3 caractères
+        </p>
+      </div>
+
+      <p class="success-msg" *ngIf="createTeamSuccess">✅ {{ createTeamSuccess }}</p>
+      <p class="error-msg" *ngIf="createTeamError">{{ createTeamError }}</p>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeCreateTeamModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="createTeamForm.invalid || isCreatingTeam">
+          {{ isCreatingTeam ? 'Création...' : "Créer l'équipe" }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Modal invitation -->
@@ -130,15 +230,28 @@
 
     <form [formGroup]="inviteForm" (ngSubmit)="sendInvite()" class="invite-form">
       <div class="form-group">
+        <label>Équipe</label>
+        <select formControlName="teamId">
+          <option value="" disabled>Sélectionner une équipe</option>
+          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+        </select>
+        <p class="error-msg"
+           *ngIf="inviteForm.get('teamId')?.invalid && inviteForm.get('teamId')?.touched">
+          Veuillez sélectionner une équipe
+        </p>
+      </div>
+
+      <div class="form-group">
         <label>Adresse email</label>
         <input type="email" formControlName="email" placeholder="membre@email.com" />
-        <p class="error-msg" *ngIf="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+        <p class="error-msg"
+           *ngIf="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
           Email invalide
         </p>
       </div>
 
       <p class="success-msg" *ngIf="inviteSuccess">✅ {{ inviteSuccess }}</p>
-      <p class="error-msg"   *ngIf="inviteError">{{ inviteError }}</p>
+      <p class="error-msg" *ngIf="inviteError">{{ inviteError }}</p>
 
       <div class="modal-actions">
         <button type="button" class="btn-secondary" (click)="closeInviteModal()">Annuler</button>
@@ -154,19 +267,36 @@
 <div class="modal-overlay" *ngIf="showSessionModal" (click)="closeSessionModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <h3 class="modal-title">🚀 Démarrer une session</h3>
-    <p class="modal-subtitle">Choisissez un modèle</p>
+    <p class="modal-subtitle">Choisissez l'équipe et le modèle à évaluer</p>
 
     <form [formGroup]="sessionForm" (ngSubmit)="startSession()" class="invite-form">
+
       <div class="form-group">
-        <label>Modèles disponibles</label>
-        <!-- ✅ formControlName au lieu de name/id natifs -->
-        <select formControlName="modelId">
-          <option [value]="model.id" *ngFor="let model of models">{{ model.title }}</option>
+        <label>Équipe</label>
+        <select formControlName="teamId">
+          <option value="" disabled>Sélectionner une équipe</option>
+          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
         </select>
+        <p class="error-msg"
+           *ngIf="sessionForm.get('teamId')?.invalid && sessionForm.get('teamId')?.touched">
+          Veuillez sélectionner une équipe
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Modèle de maturité</label>
+        <select formControlName="modelId">
+          <option value="" disabled>Sélectionner un modèle</option>
+          <option *ngFor="let model of models" [value]="model.id">{{ model.title }}</option>
+        </select>
+        <p class="error-msg"
+           *ngIf="sessionForm.get('modelId')?.invalid && sessionForm.get('modelId')?.touched">
+          Veuillez sélectionner un modèle
+        </p>
       </div>
 
       <p class="success-msg" *ngIf="sessionSuccess">✅ {{ sessionSuccess }}</p>
-      <p class="error-msg"   *ngIf="sessionError">{{ sessionError }}</p>
+      <p class="error-msg" *ngIf="sessionError">{{ sessionError }}</p>
 
       <div class="modal-actions">
         <button type="button" class="btn-secondary" (click)="closeSessionModal()">Annuler</button>
