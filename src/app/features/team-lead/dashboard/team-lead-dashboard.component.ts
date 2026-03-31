@@ -234,22 +234,6 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     this.selectedTeam = team;
   }
 
-  deleteTeam(id: number): void {
-  this.teamService.deleteTeam(id).pipe(
-    takeUntil(this.destroy$)
-  ).subscribe({
-    next: () => {
-      this.teams = this.teams.filter(t => t.id !== id);
-      this.teamsWithMembers = this.teamsWithMembers.filter(t => t.id !== id);
-      if (this.selectedTeam?.id === id) {
-        this.selectedTeam = this.teamsWithMembers[0] ?? null;
-      }
-      this.cdr.detectChanges();
-    },
-    error: (err) => console.error('Erreur suppression équipe :', err)
-  });
-}
-
   // --- Modals invite ---
 
   openInviteModal(): void {

@@ -160,35 +160,26 @@
       <div class="teams-layout" *ngIf="teamsWithMembers.length > 0">
 
         <!-- Liste des équipes (colonne gauche) -->
-<div class="teams-list">
-  <div
-    class="team-item"
-    *ngFor="let team of teamsWithMembers"
-    [class.selected]="selectedTeam?.id === team.id"
-    (click)="selectTeam(team)">
-    <div class="team-item-header">
-      <span class="team-name">{{ team.name }}</span>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="team-count">{{ team.members.length }} membre(s)</span>
-        <button
-          class="btn-danger-sm"
-          type="button"
-          (click)="$event.stopPropagation(); deleteTeam(team.id)"
-          title="Supprimer l'équipe">
-          🗑️
-        </button>
-      </div>
-    </div>
-    <div class="team-item-badges">
-      <span class="status-badge active" *ngIf="team.activeCount > 0">
-        ✅ {{ team.activeCount }} actif(s)
-      </span>
-      <span class="status-badge pending" *ngIf="team.pendingCount > 0">
-        ⏳ {{ team.pendingCount }} en attente
-      </span>
-    </div>
-  </div>
-</div>
+        <div class="teams-list">
+          <div
+            class="team-item"
+            *ngFor="let team of teamsWithMembers"
+            [class.selected]="selectedTeam?.id === team.id"
+            (click)="selectTeam(team)">
+            <div class="team-item-header">
+              <span class="team-name">{{ team.name }}</span>
+              <span class="team-count">{{ team.members.length }} membre(s)</span>
+            </div>
+            <div class="team-item-badges">
+              <span class="status-badge active" *ngIf="team.activeCount > 0">
+                ✅ {{ team.activeCount }} actif(s)
+              </span>
+              <span class="status-badge pending" *ngIf="team.pendingCount > 0">
+                ⏳ {{ team.pendingCount }} en attente
+              </span>
+            </div>
+          </div>
+        </div>
 
         <!-- Détail des membres de l'équipe sélectionnée (colonne droite) -->
         <div class="team-detail" *ngIf="selectedTeam">
@@ -333,3 +324,63 @@
     </form>
   </div>
 </div>
+
+<!-- Modal session -->
+<div class="modal-overlay" *ngIf="showSessionModal" (click)="closeSessionModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">🚀 Démarrer une session</h3>
+    <p class="modal-subtitle">Choisissez l'équipe et le modèle à évaluer</p>
+
+    <form [formGroup]="sessionForm" (ngSubmit)="startSession()" class="invite-form">
+
+      <div class="form-group">
+        <label>Équipe</label>
+        <select formControlName="teamId">
+          <option value="" disabled>Sélectionner une équipe</option>
+          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+        </select>
+        <p class="error-msg"
+           *ngIf="sessionForm.get('teamId')?.invalid && sessionForm.get('teamId')?.touched">
+          Veuillez sélectionner une équipe
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Modèle de maturité</label>
+        <select formControlName="modelId">
+          <option value="" disabled>Sélectionner un modèle</option>
+          <option *ngFor="let model of models" [value]="model.id">{{ model.title }}</option>
+        </select>
+        <p class="error-msg"
+           *ngIf="sessionForm.get('modelId')?.invalid && sessionForm.get('modelId')?.touched">
+          Veuillez sélectionner un modèle
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Nom de la session</label>
+        <input type="text" formControlName="name" placeholder="Ex: Évaluation Scrum Q2 2025" />
+        <p class="error-msg"
+           *ngIf="sessionForm.get('name')?.invalid && sessionForm.get('name')?.touched">
+          Le nom doit contenir au moins 3 caractères
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Date limite <span style="font-weight: 400; opacity: 0.6;">(optionnel)</span></label>
+        <input type="date" formControlName="deadline" />
+      </div>
+
+      <p class="success-msg" *ngIf="sessionSuccess">✅ {{ sessionSuccess }}</p>
+      <p class="error-msg" *ngIf="sessionError">{{ sessionError }}</p>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeSessionModal()">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="sessionForm.invalid || isSession">
+          {{ isSession ? 'Confirmation...' : 'Démarrer la session' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+    
