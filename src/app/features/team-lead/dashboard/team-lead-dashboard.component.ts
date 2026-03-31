@@ -264,6 +264,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.isInviting = false;
+        this.inviteError = "";
         this.inviteSuccess = `Invitation envoyée à ${email}`;
         this.inviteForm.patchValue({ email: '' });
         this.cdr.detectChanges();
@@ -318,7 +319,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
         this.isSession = false;
         this.sessionSuccess = 'Session créée avec succès';
         this.sessions = [...this.sessions, created];
-        this.sessionForm.reset();
+        this.closeSessionModal();
         this.cdr.detectChanges();
       },
       error: () => {
@@ -368,6 +369,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.isCreatingTeam = false;
         this.createTeamSuccess = `Équipe "${name.name}" créée avec succès`;
+        this.loadTeamsAndMembers();
         this.cdr.detectChanges();
       },
       error: () => {
