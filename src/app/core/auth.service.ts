@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { User } from '@models/user.model';
 import { Role } from '@models/role.enum';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
