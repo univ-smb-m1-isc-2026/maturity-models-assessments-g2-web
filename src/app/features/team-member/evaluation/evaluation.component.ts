@@ -13,7 +13,7 @@ import {
 
 import { MaturityModelService } from '@core/maturity-model.service';
 import { AuthService } from '@core/auth.service';
-import { EvaluationService } from '@core/evaluation.service';
+import { SessionResultService } from '@core/session-result.service';
 
 import { MaturityModel } from '@models/maturity-model.model';
 import { SessionResult } from '@models/session-result.model';
@@ -31,22 +31,25 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   // ── User ──────────────────────────────────────────────────────────────────
   currentUser: User | null = null;
 
-  // ── Model ─────────────────────────────────────────────────────────────────
+  // ── IDs récupérés depuis la route ─────────────────────────────────────────
   modelId: number = 0;
+  sessionId: number = 0;         // ← queryParam sessionId passé depuis le dashboard
+
+  // ── Model ─────────────────────────────────────────────────────────────────
   model: MaturityModel | null = null;
 
   // ── Reactive Form ─────────────────────────────────────────────────────────
-  sessionResultForm!: FormGroup;
+  evaluationForm!: FormGroup;
 
   // ── UI ────────────────────────────────────────────────────────────────────
   isFetching = false;
-  isLoading = false;
+  isLoading  = false;
   errorMessage = '';
 
   // ── Step ──────────────────────────────────────────────────────────────────
   step: 'form' | 'confirmation' = 'form';
 
-  // ── Backend result ────────────────────────────────────────────────────────
+  // ── Résultat retourné par le backend après soumission ────────────────────
   sessionResult: SessionResult | null = null;
 
   private destroy$ = new Subject<void>();
@@ -54,7 +57,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private maturityModelService: MaturityModelService,
-    private evaluationService: EvaluationService,
+    private sessionResultService: SessionResultService,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
@@ -65,10 +68,20 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
+    // modelId  → /member/evaluation/:id
     const idParam = this.route.snapshot.paramMap.get('id');
-    this.modelId = idParam ? Number(idParam) : 0;
+    this.modelId  = idParam ? Number(idParam) : 0;
+
+    // sessionId → queryParam ?sessionId=X passé depuis goToEvaluation()
+    const sessionParam = this.route.snapshot.queryParamMap.get('sessionId');
+    this.sessionId     = sessionParam ? Number(sessionParam) : 0;
 
     if (!this.modelId || isNaN(this.modelId)) {
+      this.router.navigate(['/member/dashboard']);
+      return;
+    }
+
+    if (!this.sessionId || isNaN(this.sessionId)) {
       this.router.navigate(['/member/dashboard']);
       return;
     }
@@ -78,7 +91,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.sessionResultForm = this.fb.group({
+    this.evaluationForm = this.fb.group({
       answers: this.fb.array([])
     });
 
@@ -90,10 +103,10 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Load model ────────────────────────────────────────────────────────────
+  // ── Chargement du modèle ──────────────────────────────────────────────────
 
   private loadModel(): void {
-    this.isFetching = true;
+    this.isFetching  = true;
     this.errorMessage = '';
 
     this.maturityModelService.getModelById(this.modelId)
@@ -101,12 +114,13 @@ export class EvaluationComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (model: MaturityModel | null) => {
           if (model?.questions?.length) {
+            // tri par ordre pour garantir que values[] est dans le bon ordre
             model.questions = [...model.questions].sort(
               (a, b) => a.questionOrder - b.questionOrder
             );
           }
 
-          this.model = model ?? null;
+          this.model      = model ?? null;
           this.isFetching = false;
 
           if (!this.model) {
@@ -114,52 +128,46 @@ export class EvaluationComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.buildSessionResultForm();
+          this.buildForm();
         },
-        error: (error) => {
-          console.error('Erreur lors du chargement du modèle :', error);
+        error: () => {
           this.errorMessage = 'Impossible de charger le modèle.';
-          this.isFetching = false;
+          this.isFetching   = false;
         }
       });
   }
 
-  // ── Build form ────────────────────────────────────────────────────────────
+  // ── Construction du formulaire ────────────────────────────────────────────
 
-  private buildSessionResultForm(): void {
-    const answersArray = this.sessionResultAnswers;
+  private buildForm(): void {
+    const answersArray = this.answers;
     answersArray.clear();
 
-    if (!this.model?.questions?.length) return;
-
-    this.model.questions.forEach(question => {
-      answersArray.push(this.createAnswerGroup(question.id));
+    this.model?.questions?.forEach(() => {
+      // une entrée par question : juste la valeur 1-5, pas de questionId
+      answersArray.push(
+        this.fb.group({ value: ['', Validators.required] })
+      );
     });
   }
 
-  private createAnswerGroup(questionId: number): FormGroup {
-    return this.fb.group({
-      questionId: [questionId],
-      value: ['', Validators.required]
-    });
-  }
+  // ── Accesseurs formulaire ─────────────────────────────────────────────────
 
-  // ── Form helpers ──────────────────────────────────────────────────────────
-
-  get sessionResultAnswers(): FormArray {
-    return this.sessionResultForm.get('answers') as FormArray;
+  get answers(): FormArray {
+    return this.evaluationForm.get('answers') as FormArray;
   }
 
   getAnswerGroup(index: number): FormGroup {
-    return this.sessionResultAnswers.at(index) as FormGroup;
+    return this.answers.at(index) as FormGroup;
   }
 
   selectAnswer(index: number, value: string): void {
     this.getAnswerGroup(index).get('value')?.setValue(value);
+    if (this.errorMessage) this.errorMessage = '';
+  }
 
-    if (this.errorMessage) {
-      this.errorMessage = '';
-    }
+  getMyValueForQuestion(index: number): number | null {
+    return this.currentParticipantValues[index] ?? null;
   }
 
   isSelected(index: number, value: string): boolean {
@@ -167,16 +175,16 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   }
 
   isAnswered(index: number): boolean {
-    const value = this.getAnswerGroup(index).get('value')?.value;
-    return value !== null && value !== undefined && value !== '';
+    const v = this.getAnswerGroup(index).get('value')?.value;
+    return v !== null && v !== undefined && v !== '';
   }
 
-  // ── Progress ──────────────────────────────────────────────────────────────
+  // ── Progression ───────────────────────────────────────────────────────────
 
   get answeredCount(): number {
-    return this.sessionResultAnswers.controls.filter(control => {
-      const value = control.get('value')?.value;
-      return value !== null && value !== undefined && value !== '';
+    return this.answers.controls.filter(c => {
+      const v = c.get('value')?.value;
+      return v !== null && v !== undefined && v !== '';
     }).length;
   }
 
@@ -190,27 +198,22 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   }
 
   get allAnswered(): boolean {
-    return this.sessionResultForm.valid;
+    return this.evaluationForm.valid;
   }
 
-  // ── Session result reading ────────────────────────────────────────────────
+  // ── Lecture du résultat après soumission ──────────────────────────────────
 
   get currentParticipantValues(): number[] {
     if (!this.sessionResult || !this.currentUser) return [];
-
-    const participant = this.sessionResult.participants?.find(
-      p => p.userId === this.currentUser?.id
-    );
-
-    return participant?.values ?? [];
+    return this.sessionResult.participants
+      ?.find(p => p.userId === this.currentUser!.id)
+      ?.values ?? [];
   }
 
   get globalAverage(): number {
     const averages = this.sessionResult?.averages;
-
     if (!averages?.length) return 0;
-
-    const total = averages.reduce((sum, value) => sum + value, 0);
+    const total = averages.reduce((sum, v) => sum + v, 0);
     return Math.round((total / averages.length) * 10) / 10;
   }
 
@@ -222,40 +225,39 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     return this.sessionResult?.participants?.length ?? 0;
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
+  // ── Soumission ────────────────────────────────────────────────────────────
 
   submitEvaluation(): void {
     if (!this.model || !this.currentUser) return;
 
-    if (this.sessionResultForm.invalid) {
-      this.sessionResultForm.markAllAsTouched();
+    if (this.evaluationForm.invalid) {
+      this.evaluationForm.markAllAsTouched();
       this.errorMessage = 'Veuillez répondre à toutes les questions avant de soumettre.';
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading    = true;
     this.errorMessage = '';
 
-    const payload:any = {
-      sessionId: 0,
-      modelId: this.modelId,
-      teamId: this.currentUser.teamId ?? 0,
-      userId: this.currentUser.id ?? 0,
-      answers: this.sessionResultForm.value.answers,
-      completedAt: new Date().toISOString()
-    };
+    // Le backend attend { values: number[] } dans l'ordre des questions
+    const values: number[] = this.answers.controls.map(
+      c => Number(c.get('value')?.value)
+    );
 
-    this.evaluationService.submit(payload)
+    this.sessionResultService.submit(this.sessionId, { values })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result: SessionResult) => {
           this.sessionResult = result;
-          this.step = 'confirmation';
-          this.isLoading = false;
+          this.step          = 'confirmation';
+          this.isLoading     = false;
         },
-        error: (error) => {
-          console.error('Erreur lors de la soumission :', error);
-          this.errorMessage = 'Une erreur est survenue lors de la soumission. Veuillez réessayer.';
+        error: (err: any) => {
+          if (err.status === 409) {
+            this.errorMessage = 'Vous avez déjà soumis vos réponses pour cette session.';
+          } else {
+            this.errorMessage = 'Une erreur est survenue lors de la soumission. Veuillez réessayer.';
+          }
           this.isLoading = false;
         }
       });
@@ -269,5 +271,6 @@ export class EvaluationComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

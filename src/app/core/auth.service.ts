@@ -112,6 +112,10 @@ export class AuthService {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
   }
 
+  registerWithToken(payload: any, token: string): Observable<any> {
+  return this.http.post(`${this.AUTH_URL}/register/${token}`, payload);
+}
+
   // POST /auth/invite
   inviteTeamMember(email: string): Observable<void> {
     return this.http.post<void>(`${this.AUTH_URL}/invite`, { email });

@@ -69,12 +69,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     
-    const payload = {
-      ...this.registerForm.getRawValue(),
-      ...(this.invitationToken && { invitationToken: this.invitationToken })
-    };
+   const { invitationToken, ...formData } = this.registerForm.getRawValue();
+   
+   console.log("formData", formData)
+    const register$ = this.invitationToken
+      ? this.authService.registerWithToken(formData, this.invitationToken)
+      : this.authService.register(formData);
 
-    this.authService.register(payload).pipe(
+    register$.pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {

@@ -57,16 +57,15 @@
           <span>Progression</span>
           <span>{{ answeredCount }} / {{ totalQuestions }}</span>
         </div>
-
         <div class="progress-bar">
           <div class="progress-bar__fill" [style.width.%]="progressPercent"></div>
         </div>
-
         <p class="progress-text">{{ progressPercent }}% complété</p>
       </section>
 
       <!-- ─────────────── FORM STEP ─────────────── -->
-      <form [formGroup]="sessionResultForm" *ngIf="step === 'form'; else confirmationStep">
+      <!-- ↓ evaluationForm (renommé depuis sessionResultForm) -->
+      <form [formGroup]="evaluationForm" *ngIf="step === 'form'; else confirmationStep">
 
         <section class="levels-section" *ngIf="model.questions?.length; else noQuestions">
 
@@ -114,7 +113,6 @@
             <p class="submit-hint" *ngIf="!allAnswered">
               Veuillez répondre à toutes les questions avant de soumettre.
             </p>
-
             <p class="submit-hint" *ngIf="allAnswered">
               Vos réponses seront définitivement enregistrées.
             </p>
@@ -128,27 +126,30 @@
       <ng-template #confirmationStep>
         <section class="result-section">
           <div class="result-card">
+
             <div class="result-card__icon">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
 
             <h2>Évaluation soumise</h2>
             <p>Vos réponses ont bien été enregistrées.</p>
 
+            <!-- Statistiques globales -->
             <div class="result-stats" *ngIf="sessionResult">
               <div class="result-stat">
                 <span class="result-stat__label">Participants</span>
                 <strong>{{ participantCount }}</strong>
               </div>
-
               <div class="result-stat">
                 <span class="result-stat__label">Moyenne globale</span>
-                <strong>{{ globalAverage }}/5</strong>
+                <strong>{{ globalAverage }} / 5</strong>
               </div>
             </div>
 
+            <!-- Résultats par question -->
             <div class="result-details" *ngIf="sessionResult && model?.questions?.length">
               <h3>Résultats par question</h3>
 
@@ -156,9 +157,47 @@
                 class="result-question"
                 *ngFor="let question of model.questions; let i = index"
               >
-                <p class="result-question__text">
-                  Q{{ question.questionOrder ?? i + 1 }} — {{ question.text }}
-                </p>
+                <div class="result-question__header">
+                  <p class="result-question__text">
+                    Q{{ question.questionOrder ?? i + 1 }} — {{ question.text }}
+                  </p>
+                </div>
+
+                <span class="result-question__score-value">
+  {{ getMyValueForQuestion(i) ?? '—' }} / 5
+</span>
+
+<!-- Barre "Moi" -->
+<div
+  class="mini-bar__fill mini-bar__fill--me"
+  [style.width.%]="(getMyValueForQuestion(i) ?? 0) * 20"
+></div>
+<span>{{ getMyValueForQuestion(i) ?? '—' }}</span>
+
+                <!-- Barre de comparaison -->
+                <div class="result-question__bars">
+                  <div class="result-question__bar-row">
+                    <span>Moi</span>
+                    <div class="mini-bar">
+                      <div
+                        class="mini-bar__fill mini-bar__fill--me"
+                        [style.width.%]="(currentParticipantValues[i] ?? 0) * 20"
+                      ></div>
+                    </div>
+                    <span>{{ currentParticipantValues[i] ?? '—' }}</span>
+                  </div>
+
+                  <div class="result-question__bar-row">
+                    <span>Équipe</span>
+                    <div class="mini-bar">
+                      <div
+                        class="mini-bar__fill mini-bar__fill--team"
+                        [style.width.%]="getQuestionAverage(i) * 20"
+                      ></div>
+                    </div>
+                    <span>{{ getQuestionAverage(i) }}</span>
+                  </div>
+                </div>
 
               </div>
             </div>
@@ -168,6 +207,7 @@
                 Retour au dashboard
               </button>
             </div>
+
           </div>
         </section>
       </ng-template>
@@ -189,7 +229,8 @@
     </main>
 
     <!-- ═══════════════════════════════════════ NO MODEL -->
-    <div class="state-overlay state-overlay--empty" *ngIf="!isFetching && !model && !errorMessage">
+    <div class="state-overlay state-overlay--empty"
+         *ngIf="!isFetching && !model && !errorMessage">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
         <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>

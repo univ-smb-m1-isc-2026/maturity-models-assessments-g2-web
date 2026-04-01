@@ -24,79 +24,143 @@
         <h1 class="main-title">Mon espace</h1>
         <p class="main-subtitle">Bienvenue, {{ currentUser?.firstName }} 👋</p>
       </div>
+      <!-- Résumé des équipes -->
+      <div class="header-meta" *ngIf="teams.length">
+        <span class="model-tag" *ngFor="let team of teams">{{ team.name }}</span>
+      </div>
     </header>
 
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-icon">📝</span>
-        <div>
-          <p class="stat-value">{{ evaluations.length }}</p>
-          <p class="stat-label">Évaluations complétées</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">📋</span>
-        <div>
-          <p class="stat-value">{{ models.length }}</p>
-          <p class="stat-label">Modèles disponibles</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">⭐</span>
-        <div>
-          <p class="stat-value">{{ evaluations[0]?.level ?? '-' }}</p>
-          <p class="stat-label">Dernier niveau atteint</p>
-        </div>
-      </div>
+    <!-- Loader -->
+    <div class="empty-state" *ngIf="isLoading">
+      <p>⏳ Chargement de vos évaluations…</p>
     </div>
 
-    <!-- Modèles disponibles -->
-    <section class="section">
-      <h2 class="section-title">📋 Modèles à évaluer</h2>
-      <div class="empty-state" *ngIf="models.length === 0">
-        <p>Aucun modèle disponible pour l'instant</p>
-      </div>
-      <div class="models-grid" *ngIf="models.length > 0">
-        <div class="model-card" *ngFor="let model of models" >
-          <div class="model-card-header">
-            <span class="model-icon">{{ model.icon }}</span>
-            <span class="model-tag">{{ model.category }}</span>
+    <!-- Erreur -->
+    <div class="empty-state" *ngIf="hasError && !isLoading">
+      <p>❌ Une erreur est survenue. Veuillez rafraîchir la page.</p>
+    </div>
+
+    <!-- Aucune équipe -->
+    <div class="empty-state" *ngIf="!isLoading && !hasError && !teams.length">
+      <p>👥 Vous n'êtes membre d'aucune équipe pour le moment.</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !hasError && teams.length">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon">👥</span>
+          <div>
+            <p class="stat-value">{{ teams.length }}</p>
+            <p class="stat-label">Équipe(s)</p>
           </div>
-          <h3 class="model-name">{{ model.title }}</h3>
-          <p class="model-desc">{{ model.description ?? 'Aucune description' }}</p>
-          <div class="model-meta">
-            <span>📝 {{ model.questions.length }} question(s)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">⏳</span>
+          <div>
+            <p class="stat-value">{{ pendingEvaluations.length }}</p>
+            <p class="stat-label">À évaluer</p>
           </div>
-          <button class="btn-primary" (click)="evaluer(model.id)">🚀 Démarrer l'évaluation</button>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">✅</span>
+          <div>
+            <p class="stat-value">{{ completedEvaluations.length }}</p>
+            <p class="stat-label">Réalisées</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">🚨</span>
+          <div>
+            <p class="stat-value">{{ overdueCount }}</p>
+            <p class="stat-label">En retard</p>
+          </div>
         </div>
       </div>
-    </section>
 
-    <!-- Historique évaluations -->
-    <section class="section">
-      <h2 class="section-title">📅 Historique de mes évaluations</h2>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Modèle</th>
-              <th>Date</th>
-              <th>Niveau atteint</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let eval of evaluations">
-              <td>{{ eval.modelTitle }}</td>
-              <td>{{ eval.date | date:'dd/MM/yyyy' }}</td>
-              <td><span class="level-badge">{{ eval.level }}</span></td>
-              <td>⭐ {{ eval.score }} / 5</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <!-- ── Sessions à évaluer ── -->
+      <section class="section">
+        <h2 class="section-title">
+          📋 Sessions à évaluer
+          <span class="level-badge" *ngIf="pendingEvaluations.length">
+            {{ pendingEvaluations.length }}
+          </span>
+        </h2>
+
+        <div class="empty-state" *ngIf="!pendingEvaluations.length">
+          <p>🎉 Aucune évaluation en attente !</p>
+        </div>
+
+        <div class="models-grid" *ngIf="pendingEvaluations.length">
+          <div
+            class="model-card"
+            *ngFor="let item of pendingEvaluations"
+            [class.model-card--overdue]="isOverdue(item)"
+          >
+            <div class="model-card-header">
+              <span class="model-icon">{{ item.model.icon ?? '📋' }}</span>
+              <span class="model-tag">{{ item.team.name }}</span>
+            </div>
+
+            <h3 class="model-name">{{ item.model.title }}</h3>
+            <p class="model-desc">{{ item.model.description ?? 'Aucune description' }}</p>
+
+            <div class="model-meta">
+              <!-- Session -->
+              <span>🗂️ {{ item.session.name }}</span>
+              <!-- Deadline -->
+              <span [class.text-danger]="isOverdue(item)">
+                📅 {{ item.session.deadline | date:'dd/MM/yyyy' }}
+                <strong *ngIf="isOverdue(item)"> — En retard</strong>
+              </span>
+            </div>
+
+            <button class="btn-primary" (click)="goToEvaluation(item)">
+              🚀 Démarrer l'évaluation
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Sessions réalisées ── -->
+      <section class="section">
+        <h2 class="section-title">
+          📅 Sessions réalisées
+          <span class="level-badge" *ngIf="completedEvaluations.length">
+            {{ completedEvaluations.length }}
+          </span>
+        </h2>
+
+        <div class="empty-state" *ngIf="!completedEvaluations.length">
+          <p>Vous n'avez pas encore complété d'évaluation.</p>
+        </div>
+
+        <div class="table-wrapper" *ngIf="completedEvaluations.length">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th>Modèle</th>
+                <th>Équipe</th>
+                <th>Date limite</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of completedEvaluations">
+                <td>{{ item.session.name }}</td>
+                <td>{{ item.model.title }}</td>
+                <td>{{ item.team.name }}</td>
+                <td>{{ item.session.deadline | date:'dd/MM/yyyy' }}</td>
+                <td><span class="level-badge">✔ Réalisée</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </ng-container>
 
   </main>
 </div>

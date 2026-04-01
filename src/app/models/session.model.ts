@@ -10,7 +10,7 @@ export interface Session {
   teamId: number; //id de la team
   name: string;
   status: SessionStatus;
-  deadline?: Date;
+  deadline: Date;
   createdAt: Date;
 }
 

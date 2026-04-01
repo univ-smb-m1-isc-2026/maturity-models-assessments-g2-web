@@ -43,7 +43,7 @@
       <div class="stat-card">
         <span class="stat-icon">🏷️</span>
         <div>
-          <p class="stat-value">{{ teams.length }}</p>
+          <p class="stat-value">{{ teamsWithMembers.length }}</p>
           <p class="stat-label">Équipes</p>
         </div>
       </div>
@@ -53,22 +53,6 @@
         <div>
           <p class="stat-value">{{ totalMembersCount }}</p>
           <p class="stat-label">Membres au total</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-icon">✅</span>
-        <div>
-          <p class="stat-value">{{ activeMembersCount }}</p>
-          <p class="stat-label">Membres actifs</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-icon">⏳</span>
-        <div>
-          <p class="stat-value">{{ pendingMembersCount }}</p>
-          <p class="stat-label">Invitations en attente</p>
         </div>
       </div>
 
@@ -159,7 +143,7 @@
 
       <div class="teams-layout" *ngIf="teamsWithMembers.length > 0">
 
-        <!-- Liste des équipes (colonne gauche) -->
+        <!-- Liste des équipes -->
         <div class="teams-list">
           <div
             class="team-item"
@@ -170,25 +154,15 @@
               <span class="team-name">{{ team.name }}</span>
               <span class="team-count">{{ team.members.length }} membre(s)</span>
             </div>
-            <div class="team-item-badges">
-              <span class="status-badge active" *ngIf="team.activeCount > 0">
-                ✅ {{ team.activeCount }} actif(s)
-              </span>
-              <span class="status-badge pending" *ngIf="team.pendingCount > 0">
-                ⏳ {{ team.pendingCount }} en attente
-              </span>
-            </div>
           </div>
         </div>
 
-        <!-- Détail des membres de l'équipe sélectionnée (colonne droite) -->
+        <!-- Détail de l'équipe sélectionnée -->
         <div class="team-detail" *ngIf="selectedTeam">
           <div class="team-detail-header">
             <h3>{{ selectedTeam.name }}</h3>
             <div class="team-detail-meta">
               <span>👥 {{ selectedTeam.members.length }} membre(s)</span>
-              <span>✅ {{ selectedTeam.activeCount }} actif(s)</span>
-              <span>⏳ {{ selectedTeam.pendingCount }} en attente</span>
             </div>
           </div>
 
@@ -295,7 +269,7 @@
         <label>Équipe</label>
         <select formControlName="teamId">
           <option value="" disabled>Sélectionner une équipe</option>
-          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+          <option *ngFor="let team of teamsWithMembers" [value]="team.id">{{ team.name }}</option>
         </select>
         <p class="error-msg"
            *ngIf="inviteForm.get('teamId')?.invalid && inviteForm.get('teamId')?.touched">
@@ -337,7 +311,7 @@
         <label>Équipe</label>
         <select formControlName="teamId">
           <option value="" disabled>Sélectionner une équipe</option>
-          <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+          <option *ngFor="let team of teamsWithMembers" [value]="team.id">{{ team.name }}</option>
         </select>
         <p class="error-msg"
            *ngIf="sessionForm.get('teamId')?.invalid && sessionForm.get('teamId')?.touched">
@@ -383,4 +357,3 @@
     </form>
   </div>
 </div>
-    
