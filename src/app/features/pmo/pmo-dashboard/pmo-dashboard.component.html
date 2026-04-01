@@ -1,0 +1,88 @@
+<div class="dashboard-wrapper">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🧩 MaturityApp</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" routerLink="/pmo/dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" routerLink="/pmo/model/new">
+        <span class="nav-icon">➕</span> Nouveau modèle
+      </a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Déconnexion
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <header class="main-header">
+      <div>
+        <h1 class="main-title">Tableau de bord PMO</h1>
+        <p class="main-subtitle">Bienvenue, {{ currentUser?.firstName }} 👋</p>
+      </div>
+      <button class="btn-primary" routerLink="/pmo/model/new">➕ Nouveau modèle</button>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <div>
+          <p class="stat-value">{{ models.length }}</p>
+          <p class="stat-label">Modèles actifs</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">👥</span>
+        <div>
+          <p class="stat-value">0</p>
+          <p class="stat-label">Équipes assignées</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des modèles -->
+    <section class="models-section">
+      <h2 class="section-title">Mes modèles de maturité</h2>
+
+      <div class="empty-state" *ngIf="models.length === 0">
+        <p>🗂️ Aucun modèle créé pour l'instant</p>
+        <button class="btn-primary" routerLink="/pmo/model/new">Créer mon premier modèle</button>
+      </div>
+
+      <div class="models-grid" *ngIf="models.length > 0">
+        <div class="model-card" *ngFor="let model of models">
+
+          <div class="model-card-header">
+            <span class="model-icon">{{ model.icon }}</span>
+            <span class="model-tag">{{ model.category }}</span>
+          </div>
+
+          <h3 class="model-name">{{ model.title }}</h3>
+          <p class="model-desc">{{ model.description ?? 'Aucune description' }}</p>
+
+          
+          <!-- Infos -->
+          <div class="model-meta">
+            <h3 class="model-subtitle"> Question(s) : </h3>
+            <div *ngFor="let question of model.questions">
+              <span>- {{ question.text}}</span>
+            </div>
+            <br>
+          </div>
+
+          <div class="model-actions">
+            <button class="btn-edit" [routerLink]="['/pmo/model/edit', model.id]">✏️ Modifier</button>
+            <button class="btn-delete" (click)="deleteModel(model.id)">🗑️ Supprimer</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

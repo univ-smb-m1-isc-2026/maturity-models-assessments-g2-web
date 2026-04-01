@@ -1,106 +1,62 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';              
+import { BehaviorSubject, Observable } from 'rxjs';
+import { switchMap, map, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';               
-import { Status, User } from '@models/user.model';
+import { Router } from '@angular/router';
+import { User } from '@models/user.model';
 import { Role } from '@models/role.enum';
-
-/**
- * Service central d'authentification de l'application.
- *
- * Responsabilités :
- * - Gérer la session utilisateur via un BehaviorSubject (état réactif)
- * - Authentifier et déconnecter l'utilisateur
- * - Persister le token JWT dans le localStorage
- * - Exposer l'état de connexion sous forme d'Observable pour les composants et guards
- * - Gérer l'inscription et les invitations de membres
- *
- * Note : les méthodes `login` et `register` utilisent actuellement des mocks locaux.
- * Les appels API réels sont préparés en commentaire et prêts à être activés.
- */
-
+import { environment } from '../../environments/environment';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
+  private readonly API_URL = `${environment.apiUrl}/api/users`;
+  private readonly AUTH_URL = `${environment.apiUrl}/api/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
 
   constructor(
     private http: HttpClient,
-    private router: Router 
-  ) {}
+    private router: Router
+  ) {
+    this.restoreSession(); 
+  }
 
-login(email: string, password: string): Observable<User> {
-
-  // mock - à supprimer 
-  const mockUsers: Record<string, User> = {
-    'pmo@test.com': {
-      id: 1,
-      firstName: 'Alice',
-      lastName: 'Martin',
-      email: 'pmo@test.com',
-      password: 'password123',
-      role: Role.PMO,
-      status : Status.ACTIF
-    },
-    'teamlead@test.com': {
-      id: 2,
-      firstName: 'Bob',
-      lastName: 'Dupont',
-      email: 'teamlead@test.com',
-      password: 'password123',
-      role: Role.TEAM_LEAD,
-      status : Status.ACTIF
-    },
-    'member@test.com': {
-      id: 3,
-      firstName: 'Charlie',
-      lastName: 'Durand',
-      email: 'member@test.com',
-      password: 'password123',
-      role: Role.TEAM_MEMBER,
-      status : Status.ACTIF
+  // Restaure l'utilisateur depuis le token au reload de la page
+  private restoreSession(): void {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.getMe().subscribe({
+        next: (user) => this.currentUserSubject.next(user),
+        error: () => this.logout()
+      });
     }
-  };
-
-  const user = mockUsers[email];
-
-  if (!user) {
-    return throwError(() => new Error('Utilisateur introuvable'));
   }
 
-  if (user.password !== password) {
-    return throwError(() => new Error('Mot de passe incorrect'));
+  // POST /auth/login
+  login(email: string, password: string): Observable<User> {
+    return this.http.post<{ token: string }>(`${this.AUTH_URL}/login`, { email, password }).pipe(
+      tap(response =>{
+        console.log("token stocké", response.token,)
+        localStorage.setItem('token', response.token)
+      } ),
+      switchMap(() => this.getMe())
+    );
   }
 
-  const mockToken = `mock-token-${user.role}-${Date.now()}`;
-
-  return of({ user, token: mockToken }).pipe(
-    delay(500), 
-    tap(response => {
-      this.currentUserSubject.next(response.user);
-      localStorage.setItem('token', response.token);
-    }),
-    map(response => response.user)
-  );
-
-  // Appel API réel :
-  // return this.http.post<{ user: User; token: string }>('/api/auth/login', { email, password }).pipe(
-  //   tap(response => {
-  //     this.currentUserSubject.next(response.user);
-  //     localStorage.setItem('token', response.token);
-  //   }),
-  //   map(response => response.user)
-  // );
-}
+  // GET /users/me — récupère l'utilisateur courant via le token
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/me`).pipe(
+      tap(user => this.currentUserSubject.next(user))    
+    );
+  }
 
   logout(): void {
     this.currentUserSubject.next(null);
     localStorage.removeItem('token');
-    this.router.navigate(['/login']); 
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
@@ -111,35 +67,62 @@ login(email: string, password: string): Observable<User> {
     return this.currentUserSubject.value;
   }
 
+  get currentUser$(): Observable<User | null> {
+    return this.currentUserSubject.asObservable();
+  }
+
   isLoggedIn$(): Observable<boolean> {
     return this.currentUserSubject.asObservable().pipe(
       map(user => !!user)
     );
   }
 
-  
+  // POST /auth/register
   register(payload: Partial<User>): Observable<User> {
-    //  Mock temporaire — à remplacer par l'appel API
-    const mockUser: User = {
-      id: 1,
-      firstName: 'Jean',
-      lastName: 'Dupont',
-      email: 'jean.dupont@email.com',
-      password: 'password123',
-      role: Role.TEAM_MEMBER, 
-      status : Status.ACTIF
-    };
-    return of(mockUser);
-
-    // Appel API réel :
-    // return this.http.post<User>('/api/auth/register', payload);
+    return this.http.post<User>(`${this.AUTH_URL}/register`, payload); // 👈 Utilise AUTH_URL
   }
 
+  // GET /users
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.API_URL);
+  }
+
+  // GET /users/{id}
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/${id}`);
+  }
+
+  // GET /users?role=ROLE
+  getUsersByRole(role: Role): Observable<User[]> {
+    return this.http.get<User[]>(this.API_URL, { params: { role } });
+  }
+
+  // POST /users/batch
+  getUsersByIds(ids: number[]): Observable<User[]> {
+    return this.http.post<User[]>(`${this.API_URL}/batch`, ids);
+  }
+
+  // PUT /users/{id}
+  updateUser(id: number, user: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.API_URL}/${id}`, user);
+  }
+
+  // DELETE /users/{id}
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  }
+
+  registerWithToken(payload: any, token: string): Observable<any> {
+  return this.http.post(`${this.AUTH_URL}/register/${token}`, payload);
+}
+
+  // POST /auth/invite
   inviteTeamMember(email: string): Observable<void> {
-    return this.http.post<void>('/api/auth/invite', { email }); // TODO : url à changer
+    return this.http.post<void>(`${this.AUTH_URL}/invite`, { email });
   }
 
+  // GET /auth/invite/{token}
   getInvitationEmail(token: string): Observable<string> {
-    return this.http.get<string>(`/api/auth/invite/${token}`); // TODO : url à changer
+    return this.http.get<string>(`${this.AUTH_URL}/invite/${token}`);
   }
 }

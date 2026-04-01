@@ -1,5 +1,8 @@
+import { Answer } from "./answer.model";
+
 export interface Question {
   id:    number;
   text:  string;
-  order: number;
+  questionOrder: number;
+  answers : Answer[];
 }

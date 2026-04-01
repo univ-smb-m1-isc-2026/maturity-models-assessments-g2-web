@@ -1,0 +1,243 @@
+<div class="dashboard-wrapper">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🧩 MaturityApp</div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/member/dashboard" routerLinkActive="active">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item active">
+        <span class="nav-icon">📝</span> Évaluation
+      </a>
+    </nav>
+
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Déconnexion
+    </button>
+  </aside>
+
+  <!-- ── Page content ─────────────────────────────────────────────────────── -->
+  <div class="page-content">
+
+    <!-- ═══════════════════════════════════════ LOADING -->
+    <div class="state-overlay" *ngIf="isFetching">
+      <div class="loader-ring"></div>
+      <p>Chargement du modèle…</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ ERROR -->
+    <div class="state-banner state-banner--error" *ngIf="errorMessage && !isFetching">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- ═══════════════════════════════════════ MAIN -->
+    <main class="eval-main" *ngIf="!isFetching && model">
+
+      <!-- ── Header modèle -->
+      <section class="model-hero">
+        <span class="model-hero__icon">{{ model.icon }}</span>
+        <div>
+          <p class="model-hero__category">{{ model.category }}</p>
+          <h1 class="model-hero__title">{{ model.title }}</h1>
+          <p class="model-hero__desc" *ngIf="model.description">
+            {{ model.description }}
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Progression -->
+      <section class="progress-section" *ngIf="step === 'form' && model.questions?.length">
+        <div class="progress-header">
+          <span>Progression</span>
+          <span>{{ answeredCount }} / {{ totalQuestions }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill" [style.width.%]="progressPercent"></div>
+        </div>
+        <p class="progress-text">{{ progressPercent }}% complété</p>
+      </section>
+
+      <!-- ─────────────── FORM STEP ─────────────── -->
+      <!-- ↓ evaluationForm (renommé depuis sessionResultForm) -->
+      <form [formGroup]="evaluationForm" *ngIf="step === 'form'; else confirmationStep">
+
+        <section class="levels-section" *ngIf="model.questions?.length; else noQuestions">
+
+          <div
+            class="question-block"
+            *ngFor="let question of model.questions; let qi = index"
+          >
+            <div class="question-header">
+              <span class="question-index">
+                Q{{ question.questionOrder ?? qi + 1 }}
+              </span>
+              <p class="question-text">{{ question.text }}</p>
+            </div>
+
+            <div class="answers-grid">
+              <button
+                type="button"
+                class="answer-btn"
+                *ngFor="let option of ['1', '2', '3', '4', '5']"
+                [class.selected]="isSelected(qi, option)"
+                (click)="selectAnswer(qi, option)"
+              >
+                {{ option }}
+              </button>
+            </div>
+
+            <p class="answer-status" *ngIf="isAnswered(qi)">
+              ✅ Réponse enregistrée
+            </p>
+          </div>
+
+          <!-- Submit -->
+          <div class="submit-bar">
+            <button
+              type="button"
+              class="btn btn--primary btn--lg"
+              (click)="submitEvaluation()"
+              [disabled]="isLoading || !allAnswered"
+              [class.btn--loading]="isLoading"
+            >
+              <span *ngIf="!isLoading">Soumettre l'évaluation</span>
+              <span class="btn-spinner" *ngIf="isLoading"></span>
+            </button>
+
+            <p class="submit-hint" *ngIf="!allAnswered">
+              Veuillez répondre à toutes les questions avant de soumettre.
+            </p>
+            <p class="submit-hint" *ngIf="allAnswered">
+              Vos réponses seront définitivement enregistrées.
+            </p>
+          </div>
+
+        </section>
+
+      </form>
+
+      <!-- ─────────────── CONFIRMATION STEP ─────────────── -->
+      <ng-template #confirmationStep>
+        <section class="result-section">
+          <div class="result-card">
+
+            <div class="result-card__icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <h2>Évaluation soumise</h2>
+            <p>Vos réponses ont bien été enregistrées.</p>
+
+            <!-- Statistiques globales -->
+            <div class="result-stats" *ngIf="sessionResult">
+              <div class="result-stat">
+                <span class="result-stat__label">Participants</span>
+                <strong>{{ participantCount }}</strong>
+              </div>
+              <div class="result-stat">
+                <span class="result-stat__label">Moyenne globale</span>
+                <strong>{{ globalAverage }} / 5</strong>
+              </div>
+            </div>
+
+            <!-- Résultats par question -->
+            <div class="result-details" *ngIf="sessionResult && model?.questions?.length">
+              <h3>Résultats par question</h3>
+
+              <div
+                class="result-question"
+                *ngFor="let question of model.questions; let i = index"
+              >
+                <div class="result-question__header">
+                  <p class="result-question__text">
+                    Q{{ question.questionOrder ?? i + 1 }} — {{ question.text }}
+                  </p>
+                </div>
+
+                <span class="result-question__score-value">
+  {{ getMyValueForQuestion(i) ?? '—' }} / 5
+</span>
+
+<!-- Barre "Moi" -->
+<div
+  class="mini-bar__fill mini-bar__fill--me"
+  [style.width.%]="(getMyValueForQuestion(i) ?? 0) * 20"
+></div>
+<span>{{ getMyValueForQuestion(i) ?? '—' }}</span>
+
+                <!-- Barre de comparaison -->
+                <div class="result-question__bars">
+                  <div class="result-question__bar-row">
+                    <span>Moi</span>
+                    <div class="mini-bar">
+                      <div
+                        class="mini-bar__fill mini-bar__fill--me"
+                        [style.width.%]="(currentParticipantValues[i] ?? 0) * 20"
+                      ></div>
+                    </div>
+                    <span>{{ currentParticipantValues[i] ?? '—' }}</span>
+                  </div>
+
+                  <div class="result-question__bar-row">
+                    <span>Équipe</span>
+                    <div class="mini-bar">
+                      <div
+                        class="mini-bar__fill mini-bar__fill--team"
+                        [style.width.%]="getQuestionAverage(i) * 20"
+                      ></div>
+                    </div>
+                    <span>{{ getQuestionAverage(i) }}</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn btn--primary" (click)="goToDashboard()">
+                Retour au dashboard
+              </button>
+            </div>
+
+          </div>
+        </section>
+      </ng-template>
+
+      <!-- ─────────────── NO QUESTIONS ─────────────── -->
+      <ng-template #noQuestions>
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 12h8M8 8h5M8 16h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <p>Ce modèle ne contient pas encore de questions.</p>
+          <a routerLink="/member/dashboard" class="btn btn--ghost">
+            Retour au tableau de bord
+          </a>
+        </div>
+      </ng-template>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════ NO MODEL -->
+    <div class="state-overlay state-overlay--empty"
+         *ngIf="!isFetching && !model && !errorMessage">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <p>Modèle introuvable.</p>
+      <a routerLink="/member/dashboard" class="btn btn--ghost">Retour</a>
+    </div>
+
+  </div>
+</div>

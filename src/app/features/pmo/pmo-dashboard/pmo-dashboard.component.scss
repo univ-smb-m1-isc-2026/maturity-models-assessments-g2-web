@@ -1,0 +1,288 @@
+$primary: #6366f1;
+$primary-dark: #4f46e5;
+$sidebar-bg: #1e1b4b;
+$text: #1e1b4b;
+$text-light: #6b7280;
+$border: #e5e7eb;
+$bg: #f5f3ff;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
+
+$font-display: 'DM Serif Display', Georgia, serif;
+$font-body:    'Sora', system-ui, sans-serif;
+
+* {
+  font-family: $font-body;
+  box-sizing: border-box;
+}
+
+
+.dashboard-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: $bg;
+
+  // --- SIDEBAR ---
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: $sidebar-bg;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    .sidebar-logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+      padding-left: 0.5rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        color: #a5b4fc;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+
+        &:hover, &.active {
+          background: rgba(99, 102, 241, 0.2);
+          color: #fff;
+        }
+      }
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.75rem;
+      color: #a5b4fc;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(244, 63, 94, 0.15);
+        color: #f43f5e;
+        border-color: #f43f5e;
+      }
+    }
+  }
+
+  // --- MAIN ---
+  .main-content {
+    margin-left: 240px;
+    flex: 1;
+    padding: 2rem;
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+
+      .main-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: $text;
+      }
+
+      .main-subtitle {
+        color: $text-light;
+        margin-top: 0.25rem;
+      }
+    }
+
+    // Stats
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+
+      .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+
+        .stat-icon { font-size: 2rem; }
+
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: $text;
+        }
+
+        .stat-label {
+          font-size: 0.8rem;
+          color: $text-light;
+        }
+      }
+    }
+
+    // Models
+    .models-section {
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: $text;
+        margin-bottom: 1rem;
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
+        background: #fff;
+        border-radius: 1rem;
+        color: $text-light;
+        font-size: 0.95rem;
+      }
+
+      .models-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+
+        .model-card {
+          background: #fff;
+          border-radius: 1rem;
+          padding: 1.5rem;
+          box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+          transition: transform 0.2s, box-shadow 0.2s;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+          }
+
+          .model-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+
+            .model-icon { font-size: 1.75rem; }
+
+            .model-tag {
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: $primary;
+              background: #ede9fe;
+              padding: 0.2rem 0.6rem;
+              border-radius: 999px;
+            }
+          }
+
+          .model-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: $text;
+            margin-bottom: 0.4rem;
+          }
+
+          .model-desc {
+            font-size: 0.85rem;
+            color: $text-light;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+          }
+
+          .model-subtitle{
+            font-size: 0.90rem;
+            font-weight: 600;
+            color: $text;
+            margin-bottom: 0.4rem;
+          }
+
+          .model-levels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
+
+            .level-badge {
+              font-size: 0.7rem;
+              font-weight: 600;
+              padding: 0.2rem 0.5rem;
+              background: #e0e7ff;
+              color: $primary-dark;
+              border-radius: 999px;
+            }
+          }
+
+          .model-actions {
+            display: flex;
+            gap: 0.5rem;
+
+            button {
+              flex: 1;
+              padding: 0.5rem;
+              border: none;
+              border-radius: 0.5rem;
+              font-size: 0.8rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+
+            .btn-edit {
+              background: #ede9fe;
+              color: $primary-dark;
+              &:hover { background: #ddd6fe; }
+            }
+
+            .btn-delete {
+              background: #fff1f2;
+              color: #f43f5e;
+              &:hover { background: #ffe4e6; }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.btn-primary {
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, $primary, $primary-dark);
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba($primary, 0.35);
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba($primary, 0.45);
+  }
+}

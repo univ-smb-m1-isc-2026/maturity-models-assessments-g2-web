@@ -1,0 +1,185 @@
+<div class="edit-wrapper">
+  <div class="edit-card">
+
+    <!-- Loading -->
+    <div class="fetching-state" *ngIf="isFetching">
+      <span class="spinner">⏳</span>
+      <p>Chargement du modèle...</p>
+    </div>
+
+    <ng-container *ngIf="!isFetching">
+
+      <div class="form-header">
+        <a routerLink="/pmo/dashboard" class="back-link">Retour</a>
+        <h2 class="form-title">Modifier le modèle</h2>
+        <p class="form-subtitle">Mettez à jour les informations</p>
+      </div>
+
+      <form [formGroup]="modelForm" (ngSubmit)="onSubmit()" class="model-form">
+
+        <!-- Titre -->
+        <div class="form-group">
+          <label for="title">Titre du modèle</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Ex: Modèle Scrum Avancé"
+            [attr.aria-invalid]="modelForm.get('title')?.invalid && modelForm.get('title')?.touched ? 'true' : null"
+            aria-describedby="title-error"
+          >
+          <p
+            id="title-error"
+            class="error-msg"
+            *ngIf="modelForm.get('title')?.invalid && modelForm.get('title')?.touched"
+            role="alert"
+          >
+            Titre requis (3 caractères minimum)
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">
+            Description
+            <span class="optional">(optionnel)</span>
+          </label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Décrivez les objectifs"
+          ></textarea>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="form-group">
+          <label>Catégorie</label>
+          <div class="category-grid" role="group" aria-label="Choisir une catégorie">
+            <button
+              type="button"
+              class="category-btn"
+              *ngFor="let cat of categories"
+              [class.selected]="modelForm.get('category')?.value === cat.value"
+              (click)="modelForm.patchValue({ category: cat.value })"
+              [attr.aria-pressed]="modelForm.get('category')?.value === cat.value"
+            >
+              <span class="cat-icon" aria-hidden="true">{{ cat.icon }}</span>
+              <span class="cat-label">{{ cat.label }}</span>
+            </button>
+          </div>
+          <p
+            class="error-msg"
+            *ngIf="modelForm.get('category')?.invalid && modelForm.get('category')?.touched"
+            role="alert"
+          >
+            Catégorie requise
+          </p>
+        </div>
+
+        <!--  Questions -->
+        <div class="form-group" formArrayName="questions">
+          <label>Questions</label>
+
+  <!-- ✅ *ngFor sur toutes les questions -->
+  <ng-container *ngFor="let question of questions.controls; let i = index">
+
+    <!-- ✅ *ngIf affiche uniquement la question courante -->
+    <div class="question-item" [formGroupName]="i" *ngIf="i === currentQuestionIndex">
+
+      <span class="item-number">{{ i + 1 }} / {{ questions.length }}</span>
+
+      <input
+        type="text"
+        formControlName="text"
+        placeholder="Saisissez votre question..."
+        [attr.aria-label]="'Question ' + (i + 1)"
+      >
+
+      <!-- Réponses -->
+      <div formArrayName="answers" class="questions-list">
+        <div
+          class="question-item"
+          *ngFor="let answer of getAnswers(i).controls; let j = index"
+          [formGroupName]="j"
+        >
+          <span class="item-number">{{ j + 1 }}</span>
+          <input
+            type="text"
+            formControlName="value"
+            placeholder="Réponse..."
+            [attr.aria-label]="'Réponse ' + (j + 1)"
+          >
+          <button
+            type="button"
+            class="btn-remove"
+            (click)="removeAnswer(i, j)"
+            [disabled]="getAnswers(i).length === 1"
+          >✕</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn-add" (click)="addAnswer(i)">
+        + Ajouter une réponse
+      </button>
+
+    </div>
+  </ng-container>
+
+  <!-- Pagination -->
+  <div class="pagination-controls">
+    <button
+      type="button"
+      (click)="prevQuestion()"
+      [disabled]="currentQuestionIndex === 0"
+    >← Précédent</button>
+
+    <span class="page-indicator">
+      {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+    </span>
+
+    <button
+      type="button"
+      (click)="nextQuestion()"
+      [disabled]="currentQuestionIndex === questions.length - 1"
+    >Suivant →</button>
+  </div>
+
+  <!-- Actions question -->
+  <div class="question-actions">
+    <button type="button" class="btn-add" (click)="addQuestion()">
+      + Ajouter une question
+    </button>
+    <button
+      type="button"
+      class="btn-remove"
+      (click)="removeQuestion(currentQuestionIndex)"
+      [disabled]="questions.length === 1"
+    >Supprimer cette question</button>
+  </div>
+
+</div>
+
+        <!-- Erreur globale -->
+        <p class="error-msg global" *ngIf="errorMessage" role="alert">
+          {{ errorMessage }}
+        </p>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <a routerLink="/pmo/dashboard" class="btn-secondary">Annuler</a>
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="modelForm.invalid || isLoading"
+            [attr.aria-busy]="isLoading"
+          >
+            {{ isLoading ? 'Enregistrement...' : 'Mettre à jour' }}
+          </button>
+        </div>
+
+      </form>
+    </ng-container>
+
+  </div>
+</div>

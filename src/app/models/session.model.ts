@@ -5,12 +5,12 @@ import { SessionStatus } from "./status.enum";
  * Modèle de session créer pour une équipe
  */
 export interface Session {
-  id: string;
+  id: number;
   modelId: number; //id du maturity-model
-  teamId: number; //id de la team 
+  teamId: number; //id de la team
   name: string;
   status: SessionStatus;
-  deadline?: Date;
+  deadline: Date;
   createdAt: Date;
 }
 
