@@ -1,43 +1,45 @@
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
-$primary:         #4f46e5;
-$primary-hover:   #4338ca;
-$primary-light:   #eef2ff;
-$primary-glow:    rgba(79, 70, 229, 0.18);
-$primary-border:  rgba(79, 70, 229, 0.4);
+$primary:        #4f46e5;
+$primary-hover:  #4338ca;
+$primary-light:  #eef2ff;
+$primary-glow:   rgba(79, 70, 229, 0.18);
+$primary-border: rgba(79, 70, 229, 0.4);
 
-$error:           #dc2626;
-$error-bg:        #fef2f2;
-$error-border:    #fca5a5;
+$error:          #dc2626;
+$error-bg:       #fef2f2;
+$error-border:   #fca5a5;
 
-$success:         #16a34a;
+// Texte — ratios WCAG AA garantis sur fond blanc
+$text:           #111827;   // > 10:1
+$text-secondary: #374151;   // > 7:1
+$text-muted:     #6b7280;   // > 4.5:1
+$text-disabled:  #9ca3af;
 
-// Typographie & couleurs neutres — contraste WCAG AA garanti
-$text:            #111827;   // ratio > 10:1 sur blanc
-$text-secondary:  #374151;   // ratio > 7:1 sur blanc
-$text-muted:      #6b7280;   // ratio > 4.5:1 sur blanc
-$text-disabled:   #9ca3af;
+$bg-page:        #f5f5f9;
+$bg-card:        #ffffff;
+$bg-input:       #ffffff;
+$bg-subtle:      #f9fafb;
 
-$bg-page:         #f5f5f9;
-$bg-card:         #ffffff;
-$bg-input:        #ffffff;
-$bg-subtle:       #f9fafb;
+$border:         #d1d5db;
+$border-focus:   $primary;
 
-$border:          #d1d5db;
-$border-focus:    $primary;
+$radius-sm:      0.5rem;
+$radius-md:      0.75rem;
+$radius-lg:      1rem;
+$radius-xl:      1.25rem;
 
-$radius-sm:       0.5rem;
-$radius-md:       0.75rem;
-$radius-lg:       1rem;
-$radius-xl:       1.25rem;
+$shadow-card:    0 1px 3px rgba(0,0,0,.06), 0 4px 20px rgba(79,70,229,.09);
+$shadow-focus:   0 0 0 3px $primary-glow;
 
-$shadow-card:     0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(79,70,229,.08);
-$shadow-focus:    0 0 0 3px $primary-glow;
+$font-display:   'DM Serif Display', Georgia, serif;
+$font-body:      'Sora', system-ui, sans-serif;
 
-$font-display:    'DM Serif Display', Georgia, serif;
-$font-body:       'Sora', system-ui, sans-serif;
+$transition:     0.18s ease;
 
-$transition:      0.18s ease;
+// ─── Google Fonts ─────────────────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap');
 
 // ─── Reset minimal ────────────────────────────────────────────────────────────
 
@@ -45,9 +47,10 @@ $transition:      0.18s ease;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: $font-body;
 }
 
-// ─── Focus visible global (accessibilité clavier) ─────────────────────────────
+// ─── Focus visible global ─────────────────────────────────────────────────────
 
 :focus-visible {
   outline: 3px solid $primary;
@@ -64,7 +67,6 @@ $transition:      0.18s ease;
   min-height: 100vh;
   padding: 2.5rem 1.5rem;
   background: $bg-page;
-  font-family: $font-body;
   color: $text;
 }
 
@@ -72,13 +74,14 @@ $transition:      0.18s ease;
 
 .edit-card {
   width: 100%;
-  max-width: 680px;
+  max-width: 640px;
   background: $bg-card;
   border: 1px solid rgba($primary, .1);
   border-radius: $radius-xl;
-  padding: 2.5rem 2.75rem;
+  padding: 2.5rem;
   box-shadow: $shadow-card;
-  animation: fadeInUp 0.3s ease both;
+  animation: fadeInUp 0.35s ease both;
+  height: fit-content;
 
   @media (max-width: 600px) {
     padding: 1.75rem 1.25rem;
@@ -86,7 +89,28 @@ $transition:      0.18s ease;
   }
 }
 
-// ─── En-tête du formulaire ────────────────────────────────────────────────────
+// ─── État de chargement ───────────────────────────────────────────────────────
+
+.fetching-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: $text-muted;
+
+  .spinner {
+    font-size: 2.5rem;
+    animation: spin 1.5s linear infinite;
+  }
+
+  p {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+}
+
+// ─── En-tête ──────────────────────────────────────────────────────────────────
 
 .form-header {
   margin-bottom: 2rem;
@@ -96,7 +120,7 @@ $transition:      0.18s ease;
   .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
     font-size: 0.8rem;
     font-weight: 600;
     color: $text-muted;
@@ -105,19 +129,17 @@ $transition:      0.18s ease;
     transition: color $transition;
 
     &::before { content: '←'; }
-
-    &:hover  { color: $primary; }
-    &:focus-visible { outline-offset: 4px; }
+    &:hover { color: $primary; }
   }
 
   .form-title {
     font-family: $font-display;
-    font-size: 1.65rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: $text;
-    margin-top: 0.9rem;
+    margin-top: 0.85rem;
     line-height: 1.2;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   .form-subtitle {
@@ -130,7 +152,7 @@ $transition:      0.18s ease;
 
 // ─── Formulaire ───────────────────────────────────────────────────────────────
 
-form.model-form {
+.model-form {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
@@ -149,46 +171,46 @@ form.model-form {
     color: $text-secondary;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-  }
 
-  // Hint optionnel sous le label
-  .field-hint {
-    font-size: 0.8rem;
-    color: $text-muted;
-    margin-top: -0.2rem;
+    .optional {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: $text-muted;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 0.35rem;
+    }
   }
 }
 
 // ─── Inputs & Textareas ───────────────────────────────────────────────────────
 
-input[type="text"],
-input[type="email"],
-input[type="number"],
+input,
 textarea {
   width: 100%;
-  padding: 0.65rem 0.9rem;
+  padding: 0.85rem 1.1rem;
   background: $bg-input;
-  border: 1.5px solid $border;
+  border: 1.5px solid #b0b7c3;
+  border-radius: $radius-md;
+  font-family: $font-body;
   border-radius: $radius-md;
   font-family: $font-body;
   font-size: 0.9rem;
   color: $text;
   line-height: 1.5;
+  outline: none;
+  resize: vertical;
   transition: border-color $transition, box-shadow $transition;
 
-  &::placeholder {
-    color: $text-disabled;
-  }
+  &::placeholder { color: $text-disabled; }
 
   &:hover:not(:disabled):not(:focus) {
     border-color: darken($border, 10%);
   }
 
   &:focus {
-    outline: none;
     border-color: $border-focus;
     box-shadow: $shadow-focus;
-    background: $bg-input;
   }
 
   &:disabled {
@@ -197,20 +219,12 @@ textarea {
     cursor: not-allowed;
   }
 
-  // État d'erreur
   &[aria-invalid="true"] {
     border-color: $error-border;
     background: $error-bg;
 
-    &:focus {
-      box-shadow: 0 0 0 3px rgba($error, .15);
-    }
+    &:focus { box-shadow: 0 0 0 3px rgba($error, .15); }
   }
-}
-
-textarea {
-  resize: vertical;
-  min-height: 100px;
 }
 
 // ─── Grille catégories ────────────────────────────────────────────────────────
@@ -218,7 +232,7 @@ textarea {
 .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.6rem;
+  gap: 0.65rem;
 
   @media (max-width: 480px) {
     grid-template-columns: repeat(2, 1fr);
@@ -255,11 +269,9 @@ textarea {
       border-color: $primary;
       background: $primary-light;
       box-shadow: inset 0 0 0 1px $primary;
-
       .cat-label { color: $primary-hover; }
     }
 
-    // Accessibilité : visible au clavier
     &:focus-visible {
       outline: 3px solid $primary;
       outline-offset: 2px;
@@ -267,37 +279,218 @@ textarea {
   }
 }
 
-// ─── Liste des niveaux ────────────────────────────────────────────────────────
+// ─── Liste niveaux ────────────────────────────────────────────────────────────
 
 .levels-list {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+}
 
-  .level-item {
+.level-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .item-number {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    background: $primary;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
 
-    .level-number {
-      flex-shrink: 0;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: $primary;
-      color: #fff;
-      border-radius: 50%;
-      font-size: 0.72rem;
-      font-weight: 800;
-    }
+  input { flex: 1; margin: 0; }
 
-    input { flex: 1; margin: 0; }
+  .btn-remove {
+    padding: 0.4rem 0.65rem;
+    background: $error-bg;
+    color: $error;
+    border: 1px solid $error-border;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition;
+
+    &:hover:not(:disabled) { background: darken($error-bg, 4%); }
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
   }
 }
 
-// ─── Bouton "Ajouter" ─────────────────────────────────────────────────────────
+// ─── Bloc question (carte) ────────────────────────────────────────────────────
+
+.question-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: $bg-subtle;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+
+  // Champ texte de la question
+  & > input {
+    width: 100%;
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: $bg-card;
+  }
+
+  // Label "Question X / Y"
+  .item-number {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: $primary;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    // Pas de cercle ici — c'est un texte "1 / 3"
+    width: auto;
+    height: auto;
+    background: none;
+    border-radius: 0;
+  }
+}
+
+// ─── Liste des réponses (dans le bloc question) ───────────────────────────────
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid $border;
+  margin-top: 0.25rem;
+
+  // Chaque ligne réponse
+  .question-item {
+    // Réinitialise le style carte pour les sous-items réponses
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    gap: 0.6rem;
+
+    .item-number {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: $border;
+      color: $text-secondary;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input { flex: 1; margin: 0; font-size: 0.875rem; }
+
+    .btn-remove {
+      padding: 0.4rem 0.65rem;
+      background: $error-bg;
+      color: $error;
+      border: 1px solid $error-border;
+      border-radius: $radius-sm;
+      font-family: $font-body;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background $transition;
+
+      &:hover:not(:disabled) { background: darken($error-bg, 4%); }
+      &:disabled { opacity: 0.35; cursor: not-allowed; }
+    }
+  }
+}
+
+// ─── Pagination questions ─────────────────────────────────────────────────────
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: $bg-card;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  margin-top: 0.5rem;
+
+  .page-indicator {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  button {
+    padding: 0.45rem 1rem;
+    background: $primary-light;
+    color: $primary-hover;
+    border: 1.5px solid $primary-border;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition, border-color $transition;
+
+    &:hover:not(:disabled) {
+      background: darken($primary-light, 4%);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ─── Actions question (ajouter / supprimer) ───────────────────────────────────
+
+.question-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+
+  // Bouton "Supprimer cette question" — rouge explicite
+  .btn-remove {
+    padding: 0.45rem 0.9rem;
+    background: $error-bg;
+    color: $error;
+    border: 1.5px solid $error-border;
+    border-radius: $radius-md;
+    font-family: $font-body;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background $transition, border-color $transition;
+
+    &:hover:not(:disabled) {
+      background: darken($error-bg, 4%);
+      border-color: darken($error-border, 6%);
+    }
+
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
+  }
+}
+
+// ─── Bouton ajouter ───────────────────────────────────────────────────────────
 
 .btn-add {
   align-self: flex-start;
@@ -313,78 +506,6 @@ textarea {
   transition: background $transition, border-color $transition;
 
   &:hover { background: darken($primary-light, 4%); }
-  &:focus-visible { outline-offset: 2px; }
-}
-
-// ─── Bouton "Supprimer" ───────────────────────────────────────────────────────
-
-.btn-remove {
-  padding: 0.4rem 0.65rem;
-  background: $error-bg;
-  color: $error;
-  border: 1px solid $error-border;
-  border-radius: $radius-sm;
-  font-family: $font-body;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background $transition;
-
-  &:hover:not(:disabled) { background: darken($error-bg, 4%); }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-}
-
-// ─── Actions de question ──────────────────────────────────────────────────────
-
-.question-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-// ─── Pagination ───────────────────────────────────────────────────────────────
-
-.pagination-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid $border;
-
-  .page-indicator {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: $text-muted;
-  }
-
-  button {
-    padding: 0.45rem 1rem;
-    background: $bg-subtle;
-    color: $text-secondary;
-    border: 1.5px solid $border;
-    border-radius: $radius-md;
-    font-family: $font-body;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background $transition, border-color $transition;
-
-    &:hover:not(:disabled) {
-      background: $primary-light;
-      border-color: $primary-border;
-      color: $primary-hover;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-  }
 }
 
 // ─── Message d'erreur ─────────────────────────────────────────────────────────
@@ -402,94 +523,91 @@ textarea {
     display: inline-block;
     width: 14px;
     height: 14px;
+    flex-shrink: 0;
     background-color: $error;
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z' clip-rule='evenodd'/%3E%3C/svg%3E");
     mask-size: contain;
     mask-repeat: no-repeat;
-    flex-shrink: 0;
   }
+
+  &.global { justify-content: center; }
 }
 
 // ─── Actions du formulaire ────────────────────────────────────────────────────
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid $border;
 
-  .btn-secondary {
-    padding: 0.65rem 1.25rem;
-    background: $bg-subtle;
-    color: $text-secondary;
-    border: 1.5px solid $border;
-    border-radius: $radius-md;
-    font-family: $font-body;
-    font-size: 0.875rem;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background $transition, border-color $transition;
+  a, button { flex: 1; text-align: center; }
+}
 
-    &:hover {
-      background: darken($bg-subtle, 3%);
-      border-color: darken($border, 8%);
-    }
+// ─── Boutons globaux ──────────────────────────────────────────────────────────
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background $transition, box-shadow $transition, transform $transition;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+    box-shadow: 0 4px 14px rgba($primary, .35);
+    transform: translateY(-1px);
   }
 
-  .btn-primary {
-    padding: 0.7rem 1.5rem;
-    background: $primary;
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    background: #c7d2fe;
     color: #fff;
-    border: none;
-    border-radius: $radius-md;
-    font-family: $font-body;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.01em;
-    transition: background $transition, box-shadow $transition, transform $transition;
-
-    &:hover:not(:disabled) {
-      background: $primary-hover;
-      box-shadow: 0 4px 12px rgba($primary, .35);
-      transform: translateY(-1px);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
-    &:disabled {
-      background: #c7d2fe;
-      color: #fff;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+    box-shadow: none;
+    cursor: not-allowed;
   }
 }
 
-// ─── Séparateur de section ────────────────────────────────────────────────────
+.btn-secondary {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: $bg-subtle;
+  color: $text-secondary;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background $transition, border-color $transition;
 
-.section-divider {
-  height: 1px;
-  background: $border;
-  margin: 0.25rem 0;
+  &:hover {
+    background: darken($bg-subtle, 3%);
+    border-color: darken($border, 8%);
+  }
 }
 
-// ─── Animation ────────────────────────────────────────────────────────────────
+// ─── Animations ───────────────────────────────────────────────────────────────
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

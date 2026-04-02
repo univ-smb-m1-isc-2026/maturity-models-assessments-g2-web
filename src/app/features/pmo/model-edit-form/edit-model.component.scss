@@ -188,9 +188,11 @@ $transition:     0.18s ease;
 input,
 textarea {
   width: 100%;
-  padding: 0.65rem 0.9rem;
+  padding: 0.85rem 1.1rem;
   background: $bg-input;
-  border: 1.5px solid $border;
+  border: 1.5px solid #b0b7c3;
+  border-radius: $radius-md;
+  font-family: $font-body;
   border-radius: $radius-md;
   font-family: $font-body;
   font-size: 0.9rem;
