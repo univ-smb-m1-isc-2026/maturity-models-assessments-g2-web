@@ -27,7 +27,7 @@
         <span>Aucun résultat pour cette session.</span>
       </div>
 
-      <div class="popup__chart-wrapper" *ngIf="!isLoadingResult && !hasResultError && results.length">
+      <div class="popup__chart-wrapper"[hidden]="isLoadingResult || hasResultError || !results.length">
         <canvas #radarCanvas></canvas>
       </div>
 

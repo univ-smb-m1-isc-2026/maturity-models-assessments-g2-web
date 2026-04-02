@@ -7,7 +7,6 @@ import {
   SimpleChanges,
   ViewChild,
   ElementRef,
-  AfterViewChecked,
   OnDestroy,
   ChangeDetectorRef
 } from '@angular/core';
@@ -18,7 +17,6 @@ import { takeUntil } from 'rxjs/operators';
 import { Session } from '@models/session.model';
 import { MaturityModel } from '@models/maturity-model.model';
 import { SessionResult } from '@models/session-result.model';
-import { Question } from '@models/question.model';
 import { SessionResultService } from '@core/session-result.service';
 
 import {
@@ -49,7 +47,7 @@ Chart.register(
   templateUrl: './session-result-popup.component.html',
   styleUrls: ['./session-result-popup.component.scss']
 })
-export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked, OnDestroy {
+export class SessionResultsPopupComponent implements OnChanges, OnDestroy {
 
   @Input() isOpen = false;
   @Input() session: Session | null = null;
@@ -64,7 +62,6 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
   hasResultError = false;
 
   private chart: Chart | null = null;
-  private chartNeedsRebuild = false;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -78,6 +75,17 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
     return this.results.length;
   }
 
+  get averagePerQuestion(): number[] {
+    if (!this.results.length || !this.model?.questions) return [];
+    const questions = [...this.model.questions].sort((a, b) => a.questionOrder - b.questionOrder);
+    return questions.map((_, qi) =>
+      Math.round(
+        this.results.reduce((sum, r) => sum + (Number(r.values[qi]) || 0), 0)
+        / this.results.length * 10
+      ) / 10
+    );
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -87,21 +95,14 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
     if (justOpened || sessionChanged) {
       this.results = [];
       this.hasResultError = false;
+      this.destroyChart();
       this.fetchResult();
       this.cdr.detectChanges();
     }
 
-    if (changes['model']) {
-      this.chartNeedsRebuild = true;
-      this.cdr.detectChanges();
+    if (changes['model'] && this.isOpen) {
+      this.tryBuildChart();
     }
-  }
-    get averagePerQuestion(): number[] {
-    if (!this.results.length || !this.model?.questions) return [];
-    const questions = [...this.model.questions].sort((a, b) => a.questionOrder - b.questionOrder);
-    return questions.map((_, qi) =>
-      Math.round(this.results.reduce((sum, r) => sum + (Number(r.values[qi]) || 0), 0) / this.results.length * 10) / 10
-    );
   }
 
   private fetchResult(): void {
@@ -114,8 +115,8 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
         next: (results: SessionResult[]) => {
           this.results = results;
           this.isLoadingResult = false;
-          this.chartNeedsRebuild = true;
           this.cdr.detectChanges();
+          this.tryBuildChart();
         },
         error: () => {
           this.hasResultError = true;
@@ -125,12 +126,13 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
       });
   }
 
-  ngAfterViewChecked(): void {
-    if (this.chartNeedsRebuild && this.isOpen && this.radarCanvas) {
-      this.chartNeedsRebuild = false;
+  private tryBuildChart(): void {
+    setTimeout(() => {
+      if (!this.isOpen || !this.results.length || !this.model?.questions?.length) return;
+      if (!this.radarCanvas?.nativeElement) return;
       this.buildChart();
       this.cdr.detectChanges();
-    }
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -154,22 +156,20 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
   // ── Radar chart ────────────────────────────────────────────────────────────
 
   private buildChart(): void {
-    if (!this.results.length || !this.model?.questions) return;
+    if (!this.results.length || !this.model?.questions?.length) return;
 
     this.destroyChart();
 
     const questions = [...this.model.questions]
       .sort((a, b) => a.questionOrder - b.questionOrder);
 
-    // Une branche par question
     const labels = questions.map(q => q.text ?? `Q${q.questionOrder}`);
 
-    // Un dataset par utilisateur
     const datasets = this.results.map((result, i) => {
-      const hue = (i * 47) % 360; // couleurs bien espacées
+      const hue = (i * 47) % 360;
       return {
-        label:result.firstName + ' ' + result.lastName,
-        data: questions.map((_, qi) => Number(result.values[qi]) ?? 0),
+        label: `${result.firstName} ${result.lastName}`,
+        data: questions.map((_, qi) => Number(result.values[qi]) || 0),
         backgroundColor: `hsla(${hue}, 70%, 60%, 0.15)`,
         borderColor: `hsla(${hue}, 70%, 60%, 1)`,
         borderWidth: 2,
@@ -180,29 +180,31 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
         pointRadius: 3,
       };
     });
-    const averages = [...this.model.questions]
-      .sort((a, b) => a.questionOrder - b.questionOrder)
-      .map((_, qi) =>
-        Math.round(this.results.reduce((sum, r) => sum + (Number(r.values[qi]) || 0), 0) / this.results.length * 10) / 10
-      );
+
+    // Dataset moyenne
+    const averages = questions.map((_, qi) =>
+      Math.round(
+        this.results.reduce((sum, r) => sum + (Number(r.values[qi]) || 0), 0)
+        / this.results.length * 10
+      ) / 10
+    );
 
     datasets.push({
       label: 'Moyenne',
       data: averages,
-      backgroundColor: 'hsla(70, 100%, 60%, 0.15)',
-      borderColor: 'hsla(70, 100%, 60%, 1)',
+      backgroundColor: 'hsla(45, 100%, 60%, 0.15)',
+      borderColor: 'hsla(45, 100%, 60%, 1)',
       borderWidth: 2,
-      pointBackgroundColor: 'hsla(70, 100%, 60%, 1)',
+      pointBackgroundColor: 'hsla(45, 100%, 60%, 1)',
       pointBorderColor: '#fff',
       pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'hsla(70, 100%, 60%, 1)',
+      pointHoverBorderColor: 'hsla(45, 100%, 60%, 1)',
       pointRadius: 4,
     });
 
     const ctx = this.radarCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
 
-    // Valeur max dynamique basée sur les réponses
     const allValues = this.results.flatMap(r => r.values.map(Number));
     const maxVal = Math.max(...allValues.filter(v => !isNaN(v)));
 

@@ -15,6 +15,11 @@ import { User } from '@models/user.model';
 import { Session } from '@models/session.model';
 import { SessionStatus } from '@models/status.enum';
 import { TeamResponse } from '@models/team-response.model';
+import { SessionResult } from '@models/session-result.model';
+import { Team } from '@models/team.model';
+
+import { SessionResultsPopupComponent } from '@features/team-member/result/session-result-popup.component';
+
 
 // ── Interface locale enrichie ────────────────────────────────────────────────
 export interface TeamWithMembers {
@@ -26,10 +31,17 @@ export interface TeamWithMembers {
   totalCount: number;
 }
 
+export interface EvaluationItem {
+  session: Session;
+  model: MaturityModel;
+  team: Team;
+  isDone: boolean;
+}
+
 @Component({
   selector: 'app-team-lead-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule,SessionResultsPopupComponent],
   templateUrl: './team-lead-dashboard.component.html',
   styleUrls: ['../../_dashboard.component.scss']
 })
@@ -64,6 +76,11 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
   showInviteModal     = false;
   showSessionModal    = false;
   showCreateTeamModal = false;
+
+  isResultsOpen = false;
+  selectedSession: Session | null = null;
+  selectedModel: MaturityModel | null = null;
+  selectedResult: SessionResult | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -351,6 +368,18 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+openResults(session: Session): void {
+  const model = this.models.find(m => m.id === session.modelId) ?? null;
+  if (!model) return;
+
+  const team = this.teamsWithMembers.find(t => t.id === session.teamId) ?? null;
+  if (!team) return;
+
+  this.selectedSession = session;
+  this.selectedModel = model;
+  this.isResultsOpen = true;
+  this.cdr.detectChanges();
+}
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   logout(): void {

@@ -121,6 +121,7 @@
                 <span *ngIf="!session.deadline" style="opacity: 0.4;">—</span>
               </td>
               <td>{{ session.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td><button class="btn-primary" (click)="openResults(session)">Voir les résultats</button></td>
               <td>
                 <button class="btn-danger-sm" type="button" (click)="deleteSession(session.id)">
                   🗑️
@@ -349,3 +350,11 @@
     </form>
   </div>
 </div>
+
+<!-- Popup -->
+<app-session-results-popup
+  [isOpen]="isResultsOpen"
+  [session]="selectedSession"
+  [model]="selectedModel"
+  (closed)="isResultsOpen = false"
+/>

@@ -34,7 +34,7 @@ $color-low:     #f87171;
   border: 1px solid $border;
   border-radius: $radius;
   width: min(560px, 94vw);
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -163,13 +163,6 @@ $color-low:     #f87171;
     animation: fadeIn 0.2s ease;
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
-  &__footer {
-    padding: 16px 24px;
-    border-top: 1px solid $border;
-    display: flex;
-    justify-content: center;
-  }
 }
 
 // ── Nav buttons ──────────────────────────────────────────────────────────────
