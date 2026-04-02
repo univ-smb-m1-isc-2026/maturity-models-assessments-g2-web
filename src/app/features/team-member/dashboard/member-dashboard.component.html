@@ -7,9 +7,6 @@
       <a class="nav-item active" routerLink="/member/dashboard">
         <span class="nav-icon">📊</span> Dashboard
       </a>
-      <a class="nav-item" routerLink="/member/evaluation">
-        <span class="nav-icon">📝</span> Mes évaluations
-      </a>
     </nav>
     <button class="logout-btn" (click)="logout()">
       <span>🚪</span> Déconnexion
@@ -23,10 +20,6 @@
       <div>
         <h1 class="main-title">Mon espace</h1>
         <p class="main-subtitle">Bienvenue, {{ currentUser?.firstName }} 👋</p>
-      </div>
-      <!-- Résumé des équipes -->
-      <div class="header-meta" *ngIf="teams.length">
-        <span class="model-tag" *ngFor="let team of teams">{{ team.name }}</span>
       </div>
     </header>
 
@@ -100,7 +93,7 @@
           >
             <div class="model-card-header">
               <span class="model-icon">{{ item.model.icon ?? '📋' }}</span>
-              <span class="model-tag">{{ item.team.name }}</span>
+              <span class="model-tag">{{ item.session.name }}</span>
             </div>
 
             <h3 class="model-name">{{ item.model.title }}</h3>
@@ -108,7 +101,7 @@
 
             <div class="model-meta">
               <!-- Session -->
-              <span>🗂️ {{ item.session.name }}</span>
+              <span>🗂️ {{ item.team.name }}</span>
               <!-- Deadline -->
               <span [class.text-danger]="isOverdue(item)">
                 📅 {{ item.session.deadline | date:'dd/MM/yyyy' }}
@@ -153,8 +146,7 @@
                 <td>{{ item.model.title }}</td>
                 <td>{{ item.team.name }}</td>
                 <td>{{ item.session.deadline | date:'dd/MM/yyyy' }}</td>
-                <td><button (click)="openResults(item)">Voir les résultats</button></td>
-                t
+                <td><button class="btn-primary" (click)="openResults(item)">Voir les résultats</button></td>
               </tr>
             </tbody>
           </table>
