@@ -16,6 +16,7 @@ import { Team } from '@models/team.model';
 import { Session } from '@models/session.model';
 import { SessionResult } from '@models/session-result.model';
 import { TeamResponse } from '@models/team-response.model';
+import { SessionResultsPopupComponent } from '../result/session-result-popup.component';
 
 export interface EvaluationItem {
   session: Session;
@@ -27,7 +28,7 @@ export interface EvaluationItem {
 @Component({
   selector: 'app-team-member-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SessionResultsPopupComponent],
   templateUrl: './member-dashboard.component.html',
   styleUrls: ['../../_dashboard.component.scss']
 })
@@ -43,6 +44,11 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
 
   isLoading = true;
   hasError = false;
+
+  isResultsOpen = false;
+selectedSession: Session | null = null;
+selectedModel: MaturityModel | null = null;
+selectedResult: SessionResult | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -232,6 +238,13 @@ export class TeamMemberDashboardComponent implements OnInit, OnDestroy {
       queryParams: { sessionId: item.session.id }
     });
   }
+
+  openResults(item: EvaluationItem): void {
+  this.selectedSession = item.session;
+  this.selectedModel = item.model;
+  this.selectedResult = this.myResults.find(r => r.idSession === item.session.id) ?? null;
+  this.isResultsOpen = true;
+}
 
   logout(): void {
     this.authService.logout();

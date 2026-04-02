@@ -1,0 +1,84 @@
+<div class="overlay" *ngIf="isOpen" (click)="onOverlayClick($event)">
+  <div class="popup" role="dialog" aria-modal="true">
+
+    <!-- Header -->
+    <div class="popup__header">
+      <div class="popup__title-block">
+        <span class="popup__icon">{{ model?.icon }}</span>
+        <div>
+          <h2 class="popup__title">{{ session?.name }}</h2>
+          <p class="popup__subtitle">{{ model?.title }} · {{ totalQuestions }} questions</p>
+        </div>
+      </div>
+      <button class="popup__close" (click)="close()" aria-label="Fermer">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="popup__body" *ngIf="result; else noResult">
+
+      <!-- Radar chart -->
+      <div class="popup__radar-wrapper">
+        <canvas #radarCanvas class="popup__radar"></canvas>
+      </div>
+
+      <!-- Pagination question -->
+      <div class="popup__question-nav">
+        <button class="nav-btn" (click)="prevQuestion()" [disabled]="currentIndex === 0">‹</button>
+        <span class="nav-label">Question {{ currentIndex + 1 }} / {{ totalQuestions }}</span>
+        <button class="nav-btn" (click)="nextQuestion()" [disabled]="currentIndex === totalQuestions - 1">›</button>
+      </div>
+
+      <!-- Question card -->
+      <div class="popup__question-card" *ngIf="currentQuestion">
+        <p class="question__text">{{ currentQuestion.text }}</p>
+        <div class="question__score">
+          <div class="score-bar">
+            <div
+              class="score-bar__fill"
+              [style.width.%]="scorePercent"
+              [class.score-bar__fill--high]="averageScore >= 3"
+              [class.score-bar__fill--mid]="averageScore === 2"
+              [class.score-bar__fill--low]="averageScore <= 1"
+            ></div>
+          </div>
+          <span class="score-value">{{ averageScore | number:'1.1-1' }} / {{ maxScore }}</span>
+        </div>
+
+        <!-- Participants dots -->
+        <div class="question__participants">
+          <span class="participants__label">Réponses individuelles</span>
+          <div class="participants__dots">
+            <span
+              *ngFor="let p of result.participants"
+              class="dot"
+              [class.dot--high]="p.values[currentIndex] >= 3"
+              [class.dot--mid]="p.values[currentIndex] === 2"
+              [class.dot--low]="p.values[currentIndex] <= 1"
+              [title]="'Valeur : ' + p.values[currentIndex]"
+            >{{ p.values[currentIndex] }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <ng-template #noResult>
+      <div class="popup__empty">
+        <span>Aucun résultat disponible pour cette session.</span>
+      </div>
+    </ng-template>
+
+    <!-- Footer -->
+    <div class="popup__footer">
+      <div class="dots">
+        <span
+          *ngFor="let q of model?.questions; let i = index"
+          class="dot-nav"
+          [class.dot-nav--active]="i === currentIndex"
+          (click)="goToQuestion(i)"
+        ></span>
+      </div>
+    </div>
+
+  </div>
+</div>

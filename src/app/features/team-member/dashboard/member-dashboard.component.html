@@ -153,7 +153,8 @@
                 <td>{{ item.model.title }}</td>
                 <td>{{ item.team.name }}</td>
                 <td>{{ item.session.deadline | date:'dd/MM/yyyy' }}</td>
-                <td><span class="level-badge">✔ Réalisée</span></td>
+                <td><button (click)="openResults(item)">Voir les résultats</button></td>
+                t
               </tr>
             </tbody>
           </table>
@@ -163,3 +164,12 @@
 
   </main>
 </div>
+
+<!-- Popup -->
+<app-session-results-popup
+  [isOpen]="isResultsOpen"
+  [session]="selectedSession"
+  [model]="selectedModel"
+  [result]="selectedResult"
+  (closed)="isResultsOpen = false"
+/>
