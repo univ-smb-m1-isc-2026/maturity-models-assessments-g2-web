@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { SessionResult } from '@models/session-result.model';
+import { environment } from 'src/environments/environment';
 
 export interface SessionResultPayload {
   values: number[]; // une valeur (1-5) par question, dans l'ordre du modèle
@@ -12,7 +13,7 @@ export interface SessionResultPayload {
 @Injectable({ providedIn: 'root' })
 export class SessionResultService {
 
-  private readonly baseUrl = '/api/sessions';
+  private readonly baseUrl = `${environment.apiUrl}/api/sessions`;
 
   constructor(private http: HttpClient) {}
 

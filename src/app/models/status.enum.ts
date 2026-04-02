@@ -1,5 +1,4 @@
 export enum SessionStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
+  OPEN = 'OPEN',
   CLOSED = 'CLOSED'
 }

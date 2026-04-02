@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ChangeDetectorRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -58,6 +59,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private maturityModelService: MaturityModelService,
     private sessionResultService: SessionResultService,
+    private cdr : ChangeDetectorRef,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
@@ -129,6 +131,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
           }
 
           this.buildForm();
+          this.cdr.detectChanges()
         },
         error: () => {
           this.errorMessage = 'Impossible de charger le modèle.';
@@ -251,6 +254,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
           this.sessionResult = result;
           this.step          = 'confirmation';
           this.isLoading     = false;
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
           if (err.status === 409) {
