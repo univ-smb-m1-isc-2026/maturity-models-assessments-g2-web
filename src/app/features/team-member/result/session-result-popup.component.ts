@@ -8,17 +8,21 @@ import {
   ViewChild,
   ElementRef,
   AfterViewChecked,
-  OnDestroy
+  OnDestroy,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Chart, BarController, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 
 import { Session } from '@models/session.model';
 import { MaturityModel } from '@models/maturity-model.model';
 import { SessionResult } from '@models/session-result.model';
 import { Question } from '@models/question.model';
+import { SessionResultService } from '@core/session-result.service';
 
-Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+Chart.register(BarController, CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 @Component({
   selector: 'app-session-results-popup',
@@ -32,15 +36,24 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
   @Input() isOpen = false;
   @Input() session: Session | null = null;
   @Input() model: MaturityModel | null = null;
-  @Input() result: SessionResult | null = null;
 
   @Output() closed = new EventEmitter<void>();
 
   @ViewChild('radarCanvas') radarCanvas!: ElementRef<HTMLCanvasElement>;
 
+  results: SessionResult[] = [];
+  isLoadingResult = false;
+  hasResultError = false;
+
   currentIndex = 0;
   private chart: Chart | null = null;
   private chartNeedsRebuild = false;
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private sessionResultService: SessionResultService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   // ── Dérivés ────────────────────────────────────────────────────────────────
 
@@ -54,28 +67,69 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
     return sorted[this.currentIndex] ?? null;
   }
 
-  get averageScore(): number {
-    return this.result?.averages?.[this.currentIndex] ?? 0;
-  }
-
-  get maxScore(): number {
-    const q = this.currentQuestion;
-    if (!q?.answers?.length) return 4;
-    return Math.max(...q.answers.map(a => (a as any).value ?? 0));
+  get averageScore(): string {
+    if (!this.results.length || !this.currentQuestion) return '-';
+    const counts = this.getAnswerCounts(this.currentIndex);
+    if (!counts.size) return '-';
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
   }
 
   get scorePercent(): number {
-    if (!this.maxScore) return 0;
-    return (this.averageScore / this.maxScore) * 100;
+    if (!this.results.length) return 0;
+    const counts = this.getAnswerCounts(this.currentIndex);
+    if (!counts.size) return 0;
+    const max = Math.max(...counts.values());
+    return Math.round((max / this.results.length) * 100);
+  }
+
+  getAnswerCounts(index: number): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const r of this.results) {
+      const val = r.values[index] ?? '';
+      if (val) map.set(val, (map.get(val) ?? 0) + 1);
+    }
+    return map;
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen'] || changes['result'] || changes['model']) {
+    const justOpened = changes['isOpen'] && this.isOpen;
+    const sessionChanged = changes['session'] && this.isOpen;
+
+    if (justOpened || sessionChanged) {
       this.currentIndex = 0;
-      this.chartNeedsRebuild = true;
+      this.results = [];
+      this.hasResultError = false;
+      this.fetchResult();
+      this.cdr.detectChanges();
     }
+
+    if (changes['model']) {
+      this.chartNeedsRebuild = true;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private fetchResult(): void {
+    if (!this.session) return;
+
+    this.isLoadingResult = true;
+    this.sessionResultService.getBySession(this.session.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (results: SessionResult[]) => {
+          this.results = results;
+          this.isLoadingResult = false;
+          this.chartNeedsRebuild = true;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.hasResultError = true;
+          this.isLoadingResult = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   ngAfterViewChecked(): void {
@@ -87,20 +141,29 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
 
   ngOnDestroy(): void {
     this.destroyChart();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   prevQuestion(): void {
-    if (this.currentIndex > 0) this.currentIndex--;
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      this.chartNeedsRebuild = true;
+    }
   }
 
   nextQuestion(): void {
-    if (this.currentIndex < this.totalQuestions - 1) this.currentIndex++;
+    if (this.currentIndex < this.totalQuestions - 1) {
+      this.currentIndex++;
+      this.chartNeedsRebuild = true;
+    }
   }
 
   goToQuestion(index: number): void {
     this.currentIndex = index;
+    this.chartNeedsRebuild = true;
   }
 
   close(): void {
@@ -113,60 +176,60 @@ export class SessionResultsPopupComponent implements OnChanges, AfterViewChecked
     }
   }
 
-  // ── Radar chart ────────────────────────────────────────────────────────────
+  // ── Bar chart ──────────────────────────────────────────────────────────────
 
   private buildChart(): void {
-    if (!this.result || !this.model?.questions) return;
+    if (!this.results.length || !this.model?.questions) return;
 
     this.destroyChart();
 
-    const sorted = [...this.model.questions].sort((a, b) => a.questionOrder - b.questionOrder);
-    const labels = sorted.map((q, i) => `Q${i + 1}`);
-    const data = this.result.averages;
+    const total = this.results.length;
+    const counts = this.getAnswerCounts(this.currentIndex);
+    const labels = [...counts.keys()];
+    const data = labels.map(l => Math.round(((counts.get(l) ?? 0) / total) * 100));
 
     const ctx = this.radarCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
 
     this.chart = new Chart(ctx, {
-      type: 'radar',
+      type: 'bar',
       data: {
         labels,
         datasets: [
           {
-            label: 'Moyenne',
+            label: '% de réponses',
             data,
-            backgroundColor: 'rgba(99, 179, 237, 0.2)',
-            borderColor: 'rgba(99, 179, 237, 0.9)',
-            borderWidth: 2,
-            pointBackgroundColor: 'rgba(99, 179, 237, 1)',
-            pointRadius: 4
+            backgroundColor: labels.map((_, i) => `hsla(${(i * 60) % 360}, 70%, 60%, 0.7)`),
+            borderColor: labels.map((_, i) => `hsla(${(i * 60) % 360}, 70%, 60%, 1)`),
+            borderWidth: 1,
+            borderRadius: 6
           }
         ]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          r: {
+          x: {
             min: 0,
+            max: 100,
             ticks: {
-              stepSize: 1,
               color: '#94a3b8',
-              backdropColor: 'transparent'
+              callback: val => `${val}%`
             },
-            grid: { color: 'rgba(148,163,184,0.2)' },
-            angleLines: { color: 'rgba(148,163,184,0.2)' },
-            pointLabels: {
-              color: '#cbd5e1',
-              font: { size: 12 }
-            }
+            grid: { color: 'rgba(148,163,184,0.15)' }
+          },
+          y: {
+            ticks: { color: '#cbd5e1' },
+            grid: { display: false }
           }
         },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: ctx => ` Moyenne : ${ctx.raw}`
+              label: ctx => ` ${ctx.raw}% (${counts.get(String(ctx.label)) ?? 0}/${total})`
             }
           }
         }

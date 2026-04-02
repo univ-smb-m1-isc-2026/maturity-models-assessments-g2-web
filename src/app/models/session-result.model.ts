@@ -4,12 +4,14 @@
 
 export interface SessionResultParticipant {
   userId: number;
-  values: number[];
+  values: string[];
 }
 
 export interface SessionResult {
-  sessionResultId: number;
+  id: number;
   idSession: number;
-  averages: number[];
-  participants: SessionResultParticipant[];
+  userId: number;
+  firstName: string;
+  lastName: string;
+  values: string[];
 }

@@ -14,9 +14,9 @@
     </div>
 
     <!-- Body -->
-    <div class="popup__body" *ngIf="result; else noResult">
+    <div class="popup__body" *ngIf="!isLoadingResult && !hasResultError && results.length">
 
-      <!-- Radar chart -->
+      <!-- Bar chart -->
       <div class="popup__radar-wrapper">
         <canvas #radarCanvas class="popup__radar"></canvas>
       </div>
@@ -31,39 +31,37 @@
       <!-- Question card -->
       <div class="popup__question-card" *ngIf="currentQuestion">
         <p class="question__text">{{ currentQuestion.text }}</p>
-        <div class="question__score">
-          <div class="score-bar">
-            <div
-              class="score-bar__fill"
-              [style.width.%]="scorePercent"
-              [class.score-bar__fill--high]="averageScore >= 3"
-              [class.score-bar__fill--mid]="averageScore === 2"
-              [class.score-bar__fill--low]="averageScore <= 1"
-            ></div>
-          </div>
-          <span class="score-value">{{ averageScore | number:'1.1-1' }} / {{ maxScore }}</span>
+
+        <div class="question__majority">
+          <span class="majority__label">Réponse majoritaire</span>
+          <span class="majority__value">{{ averageScore }}</span>
+          <span class="majority__percent">{{ scorePercent }}%</span>
         </div>
 
-        <!-- Participants dots -->
+        <!-- Réponses individuelles -->
         <div class="question__participants">
-          <span class="participants__label">Réponses individuelles</span>
-          <div class="participants__dots">
+          <span class="participants__label">Réponses individuelles ({{ results.length }})</span>
+          <div class="participants__tags">
             <span
-              *ngFor="let p of result.participants"
-              class="dot"
-              [class.dot--high]="p.values[currentIndex] >= 3"
-              [class.dot--mid]="p.values[currentIndex] === 2"
-              [class.dot--low]="p.values[currentIndex] <= 1"
-              [title]="'Valeur : ' + p.values[currentIndex]"
-            >{{ p.values[currentIndex] }}</span>
+              *ngFor="let r of results"
+              class="tag"
+              [title]="'Participant ' + r.userId"
+            >{{ r.values[currentIndex] }}</span>
           </div>
         </div>
       </div>
 
     </div>
 
-    <ng-template #noResult>
-      <div class="popup__empty">
+    <ng-template #stateBlock>
+      <div class="popup__empty" *ngIf="isLoadingResult">
+        <span class="popup__spinner"></span>
+        <span>Chargement des résultats…</span>
+      </div>
+      <div class="popup__empty popup__empty--error" *ngIf="hasResultError">
+        <span>Impossible de charger les résultats.</span>
+      </div>
+      <div class="popup__empty" *ngIf="!isLoadingResult && !hasResultError && !results">
         <span>Aucun résultat disponible pour cette session.</span>
       </div>
     </ng-template>

@@ -84,11 +84,11 @@
               <button
                 type="button"
                 class="answer-btn"
-                *ngFor="let option of ['1', '2', '3', '4', '5']"
-                [class.selected]="isSelected(qi, option)"
-                (click)="selectAnswer(qi, option)"
+                *ngFor="let ans of question.answers"
+                [class.selected]="isSelected(qi, ans.value)"
+                (click)="selectAnswer(qi, ans.value)"
               >
-                {{ option }}
+                {{ ans.value }}
               </button>
             </div>
 
