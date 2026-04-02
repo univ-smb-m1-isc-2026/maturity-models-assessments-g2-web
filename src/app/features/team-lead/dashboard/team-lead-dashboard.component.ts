@@ -18,6 +18,8 @@ import { TeamResponse } from '@models/team-response.model';
 import { SessionResult } from '@models/session-result.model';
 import { Team } from '@models/team.model';
 
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
 import { SessionResultsPopupComponent } from '@features/team-member/result/session-result-popup.component';
 
 
@@ -106,7 +108,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       teamId:   ['', Validators.required],
       modelId:  ['', Validators.required],
       name:     ['', [Validators.required, Validators.minLength(3)]],
-      deadline: [null]
+      deadline: [null, this.deadlineNotPast.bind(this)]
     });
 
     this.createTeamForm = this.fb.group({
@@ -329,6 +331,21 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
         error: err => console.error('Erreur suppression session :', err)
       });
   }
+
+  private deadlineNotPast(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (!value) {
+    return null; // deadline facultative → pas d'erreur si vide
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // on se place au début de la journée
+
+  const selected = new Date(value);
+  selected.setHours(0, 0, 0, 0);
+
+  return selected < today ? { pastDeadline: true } : null;
+}
 
   // ── Création équipe modal ─────────────────────────────────────────────────
 
