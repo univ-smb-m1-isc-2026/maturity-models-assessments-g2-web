@@ -4,15 +4,16 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { SessionResult } from '@models/session-result.model';
+import { environment } from 'src/environments/environment';
 
 export interface SessionResultPayload {
-  values: number[]; // une valeur (1-5) par question, dans l'ordre du modèle
+  values: string[]; 
 }
 
 @Injectable({ providedIn: 'root' })
 export class SessionResultService {
 
-  private readonly baseUrl = '/api/sessions';
+  private readonly baseUrl = `${environment.apiUrl}/api/sessions`;
 
   constructor(private http: HttpClient) {}
 
@@ -31,11 +32,11 @@ export class SessionResultService {
    * Tous les résultats agrégés d'une session (averages + participants).
    * GET /api/sessions/{sessionId}/results
    */
-  getBySession(sessionId: number): Observable<SessionResult> {
-    return this.http.get<SessionResult>(
+  getBySession(sessionId: number): Observable<SessionResult[]> {
+    return this.http.get<SessionResult[]>(
       `${this.baseUrl}/${sessionId}/results`
     );
-  }
+}
 
   /**
    * Vérifie si l'utilisateur connecté a déjà soumis pour cette session

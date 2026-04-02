@@ -25,7 +25,7 @@ export class SessionService {
     return new Observable(observer => {
       this.getSessionsByTeam(teamId).subscribe({
         next: sessions => {
-          observer.next(sessions.filter(s => s.status === SessionStatus.ACTIVE));
+          observer.next(sessions.filter(s => s.status === SessionStatus.OPEN));
           observer.complete();
         },
         error: err => observer.error(err)

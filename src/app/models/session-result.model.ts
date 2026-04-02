@@ -2,15 +2,16 @@
  * Modèle pour calculer les moyennes des réponses des team-member
  */
 
-// session-result.model.ts
 export interface SessionResultParticipant {
   userId: number;
-  values: number[];
+  values: string[];
 }
 
 export interface SessionResult {
-  sessionResultId: number;
-  sessionId: number;
-  averages: number[];
-  participants: SessionResultParticipant[];
+  id: number;
+  idSession: number;
+  userId: number;
+  firstName: string;
+  lastName: string;
+  values: string[];
 }

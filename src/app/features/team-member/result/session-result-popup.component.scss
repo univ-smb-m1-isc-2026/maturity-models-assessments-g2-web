@@ -1,0 +1,369 @@
+// ── Variables ────────────────────────────────────────────────────────────────
+$bg-overlay:    rgba(0, 0, 0, 0.65);
+$bg-popup:      #0f172a;
+$bg-card:       #1e293b;
+$bg-card-hover: #263045;
+$border:        rgba(148, 163, 184, 0.12);
+$accent:        #63b3ed;
+$accent-soft:   rgba(99, 179, 237, 0.15);
+$text-primary:  #f1f5f9;
+$text-muted:    #94a3b8;
+$radius:        16px;
+$radius-sm:     10px;
+
+$color-high:    #4ade80;
+$color-mid:     #facc15;
+$color-low:     #f87171;
+
+// ── Overlay ──────────────────────────────────────────────────────────────────
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: $bg-overlay;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+// ── Popup ────────────────────────────────────────────────────────────────────
+.popup {
+  background: $bg-popup;
+  border: 1px solid $border;
+  border-radius: $radius;
+  width: min(560px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid $border;
+  }
+
+  &__title-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  &__icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: -0.02em;
+  }
+
+  &__subtitle {
+    margin: 2px 0 0;
+    font-size: 0.78rem;
+    color: $text-muted;
+  }
+
+  &__close {
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 8px;
+    color: $text-muted;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: $bg-card-hover;
+      color: $text-primary;
+    }
+  }
+
+  // ── Body ──────────────────────────────────────────────────────────────────
+  &__body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+
+  &__empty {
+    padding: 48px 24px;
+    text-align: center;
+    color: $text-muted;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+
+    &--error { color: $color-low; }
+  }
+
+  &__spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(148, 163, 184, 0.2);
+    border-top-color: $accent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  // ── Radar ─────────────────────────────────────────────────────────────────
+  &__radar-wrapper {
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    padding: 16px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__radar {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  // ── Question nav ──────────────────────────────────────────────────────────
+  &__question-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  // ── Question card ─────────────────────────────────────────────────────────
+  &__question-card {
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  &__footer {
+    padding: 16px 24px;
+    border-top: 1px solid $border;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+// ── Nav buttons ──────────────────────────────────────────────────────────────
+.nav-btn {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: $text-primary;
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $bg-card-hover;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+.nav-label {
+  font-size: 0.85rem;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+// ── Question content ─────────────────────────────────────────────────────────
+.question {
+  &__text {
+    font-size: 0.95rem;
+    color: $text-primary;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  &__score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__participants {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+// ── Score bar ─────────────────────────────────────────────────────────────────
+.score-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 99px;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &--high { background: $color-high; }
+    &--mid  { background: $color-mid; }
+    &--low  { background: $color-low; }
+  }
+}
+
+.score-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-primary;
+  white-space: nowrap;
+}
+
+// ── Participants ──────────────────────────────────────────────────────────────
+.participants {
+  &__label {
+    font-size: 0.75rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+// ── Dots (valeurs participants) ───────────────────────────────────────────────
+.dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: default;
+
+  &--high { background: rgba(74, 222, 128, 0.15); color: $color-high; border: 1px solid rgba(74,222,128,0.3); }
+  &--mid  { background: rgba(250, 204, 21, 0.15);  color: $color-mid;  border: 1px solid rgba(250,204,21,0.3); }
+  &--low  { background: rgba(248, 113, 113, 0.15); color: $color-low;  border: 1px solid rgba(248,113,113,0.3); }
+}
+
+// ── Dot nav (pagination) ──────────────────────────────────────────────────────
+.dots {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dot-nav {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.25);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+
+  &--active {
+    background: $accent;
+    transform: scale(1.3);
+  }
+
+  &:hover:not(.dot-nav--active) {
+    background: rgba(148, 163, 184, 0.5);
+  }
+}
+.question__majority {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(99, 179, 237, 0.08);
+  border: 1px solid rgba(99, 179, 237, 0.2);
+  border-radius: 8px;
+}
+
+.majority {
+  &__label {
+    font-size: 0.75rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex: 1;
+  }
+  &__value {
+    font-weight: 700;
+    color: $accent;
+    font-size: 0.95rem;
+  }
+  &__percent {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+}
+
+.participants__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: $bg-card-hover;
+  border: 1px solid $border;
+  font-size: 0.78rem;
+  color: $text-primary;
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}

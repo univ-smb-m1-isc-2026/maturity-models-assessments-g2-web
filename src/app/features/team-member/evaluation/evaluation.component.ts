@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ChangeDetectorRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -58,6 +59,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private maturityModelService: MaturityModelService,
     private sessionResultService: SessionResultService,
+    private cdr : ChangeDetectorRef,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
@@ -129,6 +131,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
           }
 
           this.buildForm();
+          this.cdr.detectChanges()
         },
         error: () => {
           this.errorMessage = 'Impossible de charger le modèle.';
@@ -165,11 +168,6 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     this.getAnswerGroup(index).get('value')?.setValue(value);
     if (this.errorMessage) this.errorMessage = '';
   }
-
-  getMyValueForQuestion(index: number): number | null {
-    return this.currentParticipantValues[index] ?? null;
-  }
-
   isSelected(index: number, value: string): boolean {
     return this.getAnswerGroup(index).get('value')?.value === value;
   }
@@ -201,30 +199,6 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     return this.evaluationForm.valid;
   }
 
-  // ── Lecture du résultat après soumission ──────────────────────────────────
-
-  get currentParticipantValues(): number[] {
-    if (!this.sessionResult || !this.currentUser) return [];
-    return this.sessionResult.participants
-      ?.find(p => p.userId === this.currentUser!.id)
-      ?.values ?? [];
-  }
-
-  get globalAverage(): number {
-    const averages = this.sessionResult?.averages;
-    if (!averages?.length) return 0;
-    const total = averages.reduce((sum, v) => sum + v, 0);
-    return Math.round((total / averages.length) * 10) / 10;
-  }
-
-  getQuestionAverage(index: number): number {
-    return this.sessionResult?.averages?.[index] ?? 0;
-  }
-
-  get participantCount(): number {
-    return this.sessionResult?.participants?.length ?? 0;
-  }
-
   // ── Soumission ────────────────────────────────────────────────────────────
 
   submitEvaluation(): void {
@@ -240,10 +214,10 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     // Le backend attend { values: number[] } dans l'ordre des questions
-    const values: number[] = this.answers.controls.map(
-      c => Number(c.get('value')?.value)
+    const values: string[] = this.answers.controls.map(
+      c => String(c.get('value')?.value)
     );
-
+  console.log(values)
     this.sessionResultService.submit(this.sessionId, { values })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -251,6 +225,7 @@ export class EvaluationComponent implements OnInit, OnDestroy {
           this.sessionResult = result;
           this.step          = 'confirmation';
           this.isLoading     = false;
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
           if (err.status === 409) {

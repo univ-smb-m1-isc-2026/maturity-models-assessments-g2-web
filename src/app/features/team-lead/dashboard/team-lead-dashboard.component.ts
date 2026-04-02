@@ -175,8 +175,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
 
   getStatusLabel(status: SessionStatus): string {
     const labels: Record<SessionStatus, string> = {
-      [SessionStatus.ACTIVE]: 'Active',
-      [SessionStatus.DRAFT]:    'Brouillon',
+      [SessionStatus.OPEN]: 'Active',
       [SessionStatus.CLOSED]:  'Terminée',
     };
     return labels[status] ?? status;
@@ -184,8 +183,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: SessionStatus): string {
     const classes: Record<SessionStatus, string> = {
-      [SessionStatus.ACTIVE]: 'Active',
-      [SessionStatus.DRAFT]: 'Brouillon',
+      [SessionStatus.OPEN]: 'Active',
       [SessionStatus.CLOSED]:  'Terminée',
     };
     return classes[status] ?? '';
@@ -279,7 +277,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       teamId:   +teamId,
       modelId:  +modelId,
       name,
-      status:   SessionStatus.ACTIVE,
+      status:   SessionStatus.OPEN,
       deadline: new Date(deadline) 
     };
 
