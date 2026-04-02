@@ -22,7 +22,7 @@ export class App implements OnInit {
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: any) => {
-      const hiddenRoutes = ['dashboard', 'model', 'team'];
+      const hiddenRoutes = ['dashboard', 'model', 'team', 'member'];
       this.showHeader = !hiddenRoutes.some(r => e.url.includes(r));
     });
   }

@@ -176,6 +176,8 @@ selectedResult: SessionResult | null = null;
         const teamResponse = this.teams.find(t => t.id === session.teamId);
         if (!teamResponse) return of(null);
         const team: Team = this.mapTeamResponseToTeam(teamResponse);
+        console.log('Session:', session);
+        console.log("results:", this.myResults);
         const isDone = this.myResults.some(result => result.idSession === session.id);
 
         return this.maturityModelService.getModelById(session.modelId).pipe(
@@ -210,7 +212,6 @@ selectedResult: SessionResult | null = null;
       .subscribe(items => {
         this.pendingEvaluations = items.filter(item => !item.isDone);
         this.completedEvaluations = items.filter(item => item.isDone);
-
         this.cdr.detectChanges();
       });
   }
@@ -244,6 +245,7 @@ selectedResult: SessionResult | null = null;
   this.selectedModel = item.model;
   this.selectedResult = this.myResults.find(r => r.idSession === item.session.id) ?? null;
   this.isResultsOpen = true;
+  this.cdr.detectChanges();  
 }
 
   logout(): void {

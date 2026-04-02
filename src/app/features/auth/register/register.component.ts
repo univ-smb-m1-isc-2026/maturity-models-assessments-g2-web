@@ -70,8 +70,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     
    const { invitationToken, ...formData } = this.registerForm.getRawValue();
-   
-   console.log("formData", formData)
+  
     const register$ = this.invitationToken
       ? this.authService.registerWithToken(formData, this.invitationToken)
       : this.authService.register(formData);

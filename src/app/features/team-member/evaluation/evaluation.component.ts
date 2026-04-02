@@ -19,6 +19,7 @@ import { SessionResultService } from '@core/session-result.service';
 import { MaturityModel } from '@models/maturity-model.model';
 import { SessionResult } from '@models/session-result.model';
 import { User } from '@models/user.model';
+import { Answer } from '@models/answer.model';
 
 @Component({
   selector: 'app-evaluation',
@@ -32,9 +33,10 @@ export class EvaluationComponent implements OnInit, OnDestroy {
   // ── User ──────────────────────────────────────────────────────────────────
   currentUser: User | null = null;
 
+
   // ── IDs récupérés depuis la route ─────────────────────────────────────────
   modelId: number = 0;
-  sessionId: number = 0;         // ← queryParam sessionId passé depuis le dashboard
+  sessionId: number = 0;         
 
   // ── Model ─────────────────────────────────────────────────────────────────
   model: MaturityModel | null = null;
@@ -164,11 +166,12 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     return this.answers.at(index) as FormGroup;
   }
 
-  selectAnswer(index: number, value: string): void {
+  selectAnswer(index: number, value: number): void {
     this.getAnswerGroup(index).get('value')?.setValue(value);
     if (this.errorMessage) this.errorMessage = '';
   }
-  isSelected(index: number, value: string): boolean {
+
+  isSelected(index: number, value: number): boolean {
     return this.getAnswerGroup(index).get('value')?.value === value;
   }
 
@@ -214,8 +217,8 @@ export class EvaluationComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     // Le backend attend { values: number[] } dans l'ordre des questions
-    const values: string[] = this.answers.controls.map(
-      c => String(c.get('value')?.value)
+    const values: number[] = this.answers.controls.map(
+      c => Number(c.get('value')?.value)
     );
   console.log(values)
     this.sessionResultService.submit(this.sessionId, { values })

@@ -7,7 +7,7 @@ import { SessionResult } from '@models/session-result.model';
 import { environment } from 'src/environments/environment';
 
 export interface SessionResultPayload {
-  values: string[]; 
+  values: number[]; 
 }
 
 @Injectable({ providedIn: 'root' })

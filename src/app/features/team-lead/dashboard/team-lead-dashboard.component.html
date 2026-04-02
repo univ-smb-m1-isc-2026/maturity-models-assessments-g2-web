@@ -177,20 +177,12 @@
                 <tr>
                   <th>Nom</th>
                   <th>Email</th>
-                  <th>Statut</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let member of selectedTeam.members">
                   <td>{{ member.firstName }} {{ member.lastName }}</td>
                   <td>{{ member.email }}</td>
-                  <td>
-                    <span class="status-badge"
-                          [class.active]="member.status === 'Actif'"
-                          [class.pending]="member.status === 'En attente'">
-                      {{ member.status }}
-                    </span>
-                  </td>
                 </tr>
               </tbody>
             </table>

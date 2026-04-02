@@ -218,6 +218,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
     }
     this.inviteSuccess = '';
     this.inviteError   = '';
+    this.cdr.detectChanges();
   }
 
   sendInvite(): void {
@@ -234,6 +235,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isInviting    = false;
+          this.inviteError   = '';
           this.inviteSuccess = `Invitation envoyée à ${email}`;
           this.inviteForm.patchValue({ email: '' });
           this.cdr.detectChanges();
@@ -241,6 +243,7 @@ export class TeamLeadDashboardComponent implements OnInit, OnDestroy {
         error: () => {
           this.isInviting  = false;
           this.inviteError = "Erreur lors de l'envoi de l'invitation";
+          this.cdr.detectChanges();
         }
       });
   }

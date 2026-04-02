@@ -13,5 +13,5 @@ export interface SessionResult {
   userId: number;
   firstName: string;
   lastName: string;
-  values: string[];
+  values: number[];
 }
